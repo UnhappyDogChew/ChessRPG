@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\MonoGame\v3.0\MonoGame.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\MonoGame\v3.0\MonoGame.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
+    <ProjectGuid>{3A23AA06-840E-4419-9CA5-6CA6A633EB1F}</ProjectGuid>
+    <ProjectTypeGuids>{A3F8F2AB-B479-4A4A-A458-A89E7DC349F1};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>ChessRPGMac</RootNamespace>
+    <AssemblyName>ChessRPGMac</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <MonoMacResourcePrefix>Resources</MonoMacResourcePrefix>
+    <MonoGamePlatform>DesktopGL</MonoGamePlatform>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug</OutputPath>
+    <DefineConstants>DEBUG;</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <EnableCodeSigning>false</EnableCodeSigning>
+    <CodeSigningKey>Mac Developer</CodeSigningKey>
+    <CreatePackage>false</CreatePackage>
+    <EnablePackageSigning>false</EnablePackageSigning>
+    <IncludeMonoRuntime>false</IncludeMonoRuntime>
+    <UseSGen>true</UseSGen>
+    <UseRefCounting>true</UseRefCounting>
+    <PlatformTarget>x86</PlatformTarget>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release</OutputPath>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <EnableCodeSigning>false</EnableCodeSigning>
+    <CreatePackage>true</CreatePackage>
+    <EnablePackageSigning>false</EnablePackageSigning>
+    <IncludeMonoRuntime>true</IncludeMonoRuntime>
+    <UseSGen>true</UseSGen>
+    <UseRefCounting>true</UseRefCounting>
+    <LinkMode>SdkOnly</LinkMode>
+    <PlatformTarget>x86</PlatformTarget>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="Xamarin.Mac" />
+    <Reference Include="MonoGame.Framework">
+      <HintPath>$(MonoGameInstallDirectory)\MonoGame\v3.0\Assemblies\DesktopGL\MonoGame.Framework.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Game1.cs" />
+    <Compile Include="Main.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Toolbox.cs" />
+    <Compile Include="Sprite.cs" />
+    <Compile Include="World.cs" />
+    <Compile Include="Collider.cs" />
+    <Compile Include="Item.cs" />
+    <Compile Include="Enumerations.cs" />
+    <Compile Include="IDrawable.cs" />
+    <Compile Include="Layers\Layer.cs" />
+    <Compile Include="Layers\GameObjectLayer.cs" />
+    <Compile Include="States\State.cs" />
+    <Compile Include="States\ExploreState.cs" />
+    <Compile Include="Layers\Tilemap.cs" />
+    <Compile Include="States\EmptyState.cs" />
+    <Compile Include="SpriteBox.cs" />
+    <Compile Include="States\InteractionState.cs" />
+    <Compile Include="GameObjects\GameObject.cs" />
+    <Compile Include="GameObjects\InteractableObject.cs" />
+    <Compile Include="GameObjects\Lantern.cs" />
+    <Compile Include="GameObjects\Player.cs" />
+    <Compile Include="GameObjects\Boundary.cs" />
+    <Compile Include="GUIs\GUIComponent.cs" />
+    <Compile Include="GUIs\Textbox.cs" />
+    <Compile Include="DynamicWord.cs" />
+    <Compile Include="Global.cs" />
+    <Compile Include="Layers\GUILayer.cs" />
+    <Compile Include="States\TeamManageState.cs" />
+    <Compile Include="Buff.cs" />
+    <Compile Include="GUIs\TeamManagement.cs" />
+    <Compile Include="Camera.cs" />
+    <Compile Include="GUIs\HeroSummary.cs" />
+    <Compile Include="GUIs\ClassElementIcon.cs" />
+    <Compile Include="GUIs\ITooltipInvoker.cs" />
+    <Compile Include="GUIs\IDragable.cs" />
+    <Compile Include="GUIs\DragSocket.cs" />
+    <Compile Include="GUIs\BasicComponents.cs" />
+    <Compile Include="Layers\EffectLayer.cs" />
+    <Compile Include="States\KeyAction.cs" />
+    <Compile Include="ISelectable.cs" />
+    <Compile Include="SelectableGroup.cs" />
+    <Compile Include="Point.cs" />
+    <Compile Include="GUIs\ItemIcon.cs" />
+    <Compile Include="BattleStage.cs" />
+    <Compile Include="Heros\Hero.cs" />
+    <Compile Include="Heros\Hero1.cs" />
+    <Compile Include="Heros\Skill.cs" />
+    <Compile Include="Heros\Hero2.cs" />
+    <Compile Include="Fighter.cs" />
+    <Compile Include="GUIs\SkillIcon.cs" />
+    <Compile Include="States\BattleState.cs" />
+    <Compile Include="GameObjects\FighterObject.cs" />
+    <Compile Include="Enemies\Goul.cs" />
+    <Compile Include="Enemies\Enemy.cs" />
+    <Compile Include="GUIs\FighterGages.cs" />
+    <Compile Include="GameObjects\EnemySoul.cs" />
+    <Compile Include="GUIs\ActionMenu.cs" />
+    <Compile Include="GUIs\ActionSelect.cs" />
+    <Compile Include="Heros\Action.cs" />
+    <Compile Include="Enemies\EnemySkill.cs" />
+    <Compile Include="Selector.cs" />
+    <Compile Include="Strings.Designer.cs">
+      <DependentUpon>Strings.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Effects\Effect.cs" />
+    <Compile Include="Effects\SlashEffect.cs" />
+    <Compile Include="SpriteAnimation.cs" />
+    <Compile Include="Effects\DamageEffect.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Info.plist" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Icon.ico" />
+    <EmbeddedResource Include="Strings.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Strings.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <MonoGameContentReference Include="Content\Content.mgcb" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="MonoGame.Framework.dll.config">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Content\Tilemaps\tilemap1.tm">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <NativeReference Include="$(MonoGameInstallDirectory)\MonoGame\v3.0\Assemblies\DesktopGL\libopenal.1.dylib">
+      <Link>libopenal.1.dylib</Link>
+      <Kind>Static</Kind>
+    </NativeReference>
+    <NativeReference Include="$(MonoGameInstallDirectory)\MonoGame\v3.0\Assemblies\DesktopGL\libSDL2-2.0.0.dylib">
+      <Link>libSDL2-2.0.0.dylib</Link>
+      <Kind>Static</Kind>
+    </NativeReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Content\Tilemaps\" />
+    <Folder Include="Layers\" />
+    <Folder Include="States\" />
+    <Folder Include="GameObjects\" />
+    <Folder Include="GUIs\" />
+    <Folder Include="Heros\" />
+    <Folder Include="Enemies\" />
+    <Folder Include="Effects\" />
+  </ItemGroup>
+  <Import Project="$(MSBuildExtensionsPath)\Xamarin\Mac\Xamarin.Mac.CSharp.targets" />
+  <Import Project="$(MSBuildExtensionsPath)\MonoGame\v3.0\MonoGame.Content.Builder.targets" />
+</Project>
