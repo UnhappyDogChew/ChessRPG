@@ -1,5 +1,5 @@
 ﻿using System;
-
+using System.Collections.Generic;
 using Microsoft.Xna.Framework.Graphics;
 
 namespace ChessRPGMac
@@ -15,13 +15,13 @@ namespace ChessRPGMac
             HeroClass = Class.Priest;
             HeroElement = Element.Light;
             maxHp = 300;
-            mana = 50;
+            mana = 10;
             speed = 50;
             strength = 5;
             intelligence = 35;
             defense = 5;
-            attacks = new Skill[] { new MeleeAttack(this) };
-            skills = new Skill[] { new Heal(this), new SuperHeal(this), null, null, null };
+            attacks = new Skill[] { new RangeAttack() };
+            skills = new Skill[] { new Heal(), new SuperHeal(), null, null, null };
 
             Reset();
         }
@@ -29,7 +29,7 @@ namespace ChessRPGMac
 
     public class Heal : Skill
     {
-        public Heal(Hero user) : base(user)
+        public Heal()
         {
             name = "Heal";
             icon = Global.content.Load<Texture2D>("Heal");
@@ -38,9 +38,12 @@ namespace ChessRPGMac
             isActive = true;
 
         }
-        public override void DoAction(BattleStage stage, FighterObject user, FighterObject target)
+
+        public override void Execute(BattleStage stage, FighterObject user, List<FighterObject> targetList, ActionFinishHandler handler)
         {
-            target.fighter.RestoreHP(this.user.intelligence * 2);
+            targetList[0].fighter.RestoreHP(((Hero)user.fighter).intelligence * 2);
+            handler(null);
+            base.Execute(stage, user, targetList, handler);
         }
 
         public override string GetDescription()
@@ -51,18 +54,23 @@ namespace ChessRPGMac
 
     public class SuperHeal : Skill
     {
-        public SuperHeal(Hero user) : base(user)
+        public SuperHeal()
         {
             name = "Super Heal";
             icon = Global.content.Load<Texture2D>("Heal");
-            manaUsage = 100;
-            targetType = TargetType.Row;
+            manaUsage = 70;
             isActive = true;
-
+            targetType = TargetType.AllAlley;
         }
-        public override void DoAction(BattleStage stage, FighterObject user, FighterObject target)
+
+        public override void Execute(BattleStage stage, FighterObject user, List<FighterObject> targetList, ActionFinishHandler handler)
         {
-            target.fighter.RestoreHP(this.user.intelligence * 2);
+            foreach (FighterObject target in targetList)
+            {
+                target.fighter.RestoreHP(((Hero)user.fighter).intelligence * 2);
+            }
+            handler(null);
+            base.Execute(stage, user, targetList, handler);
         }
 
         public override string GetDescription()

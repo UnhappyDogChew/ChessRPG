@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -7,10 +8,12 @@ namespace ChessRPGMac
     public abstract class FighterObject : GameObject, ISelectable
     {
         public Fighter fighter { get; protected set; }
+        public List<Buff> buffList;
         public delegate void AnimationFinishHandler();
         public AnimationFinishHandler animationFinishHandler;
 
         bool moving;
+        bool summoning;
         Point movePoint;
 
         EffectLayer bottomEffectLayer;
@@ -19,7 +22,9 @@ namespace ChessRPGMac
         {
             this.fighter = fighter.Copy();
             this.collider = new NullCollider();
+            buffList = new List<Buff>();
             bottomEffectLayer = (EffectLayer)Global.world.GetLayer("BottomEffectLayer");
+            summoning = true;
         }
 
         public override void Update(GameTime gameTime)
@@ -48,6 +53,28 @@ namespace ChessRPGMac
                     animationFinishHandler?.Invoke();
                 }
             }
+            if (summoning)
+            {
+                summoning = false;
+            }
+
+            // Remove finished buffs.
+            for (int i = 0; i < buffList.Count; i++)
+            {
+                if (buffList[i].Finished)
+                {
+                    buffList.RemoveAt(i);
+                    i--;
+                }
+            }
+        }
+
+        public void AddBuff(Buff buff, int duration, int interval = 0)
+        {
+            buff.SetTarget(this);
+            buff.SetDuration(duration);
+            buff.SetInterval(interval);
+            buffList.Add(buff);
         }
 
         public virtual Point GetLocation()
@@ -69,39 +96,39 @@ namespace ChessRPGMac
             }
         }
 
-        public virtual void Attacked()
-        {
-            ShakeAnimation animation = new ShakeAnimation();
-            animation.animationFinishHandler = () => { animationFinishHandler(); };
-            fighter.sprite.animation = animation;
-        }
-
-        public virtual void MeleeAttack()
-        {
-            MeleeAttackAnimation animation = new MeleeAttackAnimation(Direction.Up);
-            animation.animationFinishHandler = () => { animationFinishHandler(); };
-            fighter.sprite.animation = animation;
-        }
-
-        public virtual bool DealDamage(int pureDamage, int pierce = 0)
+        public virtual DamageEffect DealDamage(int pureDamage, int pierce = 0)
         {
             int actualDamage = fighter.HP;
             bool isDead = fighter.DealDamage(pureDamage, pierce);
             actualDamage = actualDamage - fighter.HP;
             DamageEffect damageEffect = new DamageEffect(actualDamage, x, y, 0);
-            bottomEffectLayer.elements.Add(damageEffect);
-            if (animationFinishHandler != null)
-                damageEffect.EffectFinishEvent += (e) => { animationFinishHandler(); };
 
-            return isDead;
+            return damageEffect;
         }
 
-        public void MoveLocation(Point location)
+        /// <summary>
+        /// Moves the location.
+        /// </summary>
+        /// <returns><c>true</c>, if location was moved, <c>false</c> otherwise.</returns>
+        /// <param name="location">Location.</param>
+        public bool MoveLocation(Point location)
         {
+            if (summoning)
+            {
+                x = location.x;
+                y = location.y;
+                return false;
+            }
             if (location.x == x && location.y == y)
-                return;
+                return false;
             moving = true;
             movePoint = location;
+            return true;
+        }
+
+        public void SetSpriteAnimation(SpriteAnimation animation)
+        {
+            fighter.sprite.animation = animation;
         }
 
         public void Kill()
@@ -147,11 +174,6 @@ namespace ChessRPGMac
         {
             fighter.sprite.Draw(gameTime, spriteBatch, x, y, Color.White);
         }
-
-        public override void MeleeAttack()
-        {
-            fighter.sprite.animation = new MeleeAttackAnimation(Direction.Down);
-        }
     }
 
     public class NullFighterObject : FighterObject
@@ -188,20 +210,10 @@ namespace ChessRPGMac
         }
 
         #region Not implemented methods
-        public override void Attacked()
+        public override DamageEffect DealDamage(int pureDamage, int pierce = 0)
         {
             throw new NotImplementedException();
         }
-
-        public override bool DealDamage(int pureDamage, int pierce = 0)
-        {
-            throw new NotImplementedException();
-        }
-
-        public override void MeleeAttack()
-        {
-            throw new NotImplementedException();
-        } 
         #endregion
     }
 }

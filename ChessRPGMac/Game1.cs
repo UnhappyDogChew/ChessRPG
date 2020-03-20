@@ -5,6 +5,8 @@ using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Microsoft.Xna.Framework.Media;
+using Microsoft.Xna.Framework.Audio;
 
 namespace ChessRPGMac.MacOS
 {
@@ -18,6 +20,7 @@ namespace ChessRPGMac.MacOS
 
         State state;
         Texture2D cursor;
+        Song song;
 
         public Game1()
         {
@@ -55,6 +58,7 @@ namespace ChessRPGMac.MacOS
             Global.spriteBox = new SpriteBox();
 
             cursor = Content.Load<Texture2D>("MouseCursor");
+            SoundEffect se = Content.Load<SoundEffect>("Town-of-Forgotten-Souls");
 
             // Create layers.
             FileStream fs = (FileStream)TitleContainer.OpenStream("Content/Tilemaps/tilemap1.tm");

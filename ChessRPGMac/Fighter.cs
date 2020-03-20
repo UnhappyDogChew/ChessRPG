@@ -25,9 +25,17 @@ namespace ChessRPGMac
         public bool alive { get; protected set; }
         public FighterState state { get; protected set; }
 
+        // 상태이상
+        public bool paused { get; set; }
+        public bool immovable { get; set; }
+        public bool incurable { get; set; }
+
         public Fighter()
         {
             alive = true;
+            paused = false;
+            immovable = false;
+            incurable = false;
         }
         /// <summary>
         /// Deals damage to this <see cref=" Fighter"/>.
@@ -47,19 +55,27 @@ namespace ChessRPGMac
             return false;
         }
 
-        public void RestoreHP(int heal)
+        public bool RestoreHP(int heal)
         {
+            if (incurable)
+                return false;
+
             HP += heal;
             if (HP > maxHp)
                 HP = maxHp;
+
+            return true;
         }
         /// <summary>
         /// Increases AP.
         /// </summary>
         /// <returns><c>true</c>, if AP exceed 100, <c>false</c> otherwise.</returns>
         /// <param name="framePerSecond">Frame per second.</param>
-        public bool IncreaseAP(int framePerSecond)
+        public virtual bool IncreaseGage(int framePerSecond)
         {
+            if (paused)
+                return false;
+
             AP += (float)speed / framePerSecond;
             if (AP >= 100)
             {
@@ -86,6 +102,9 @@ namespace ChessRPGMac
 
         public virtual bool ChangeState(FighterState state)
         {
+            if (state != FighterState.Stored && immovable)
+                return false;
+
             this.state = state;
             return true;
         }

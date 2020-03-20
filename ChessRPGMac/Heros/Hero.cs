@@ -42,5 +42,26 @@ namespace ChessRPGMac
             SP = 0;
             AP = 0;
         }
+
+        public override bool IncreaseGage(int framePerSecond)
+        {
+            IncreaseSP((float)mana / framePerSecond);
+
+            return base.IncreaseGage(framePerSecond);
+        }
+
+        public void IncreaseSP(float increase)
+        {
+            SP += increase;
+            if (SP > 100)
+                SP = 100;
+        }
+
+        public void DecreaseSP(float decrease)
+        {
+            SP -= decrease;
+            if (SP < 0)
+                SP = 0;
+        }
     }
 }

@@ -12,6 +12,10 @@ namespace ChessRPGMac
 
         Hero hero { get { return heroObject.hero; } }
 
+        int HP;
+        float SP;
+        float AP;
+
         const int FRAME_WIDTH = 54;
         const int FRAME_HEIGHT = 20;
         const int GAGEBAR_WIDTH = 50;
@@ -36,13 +40,13 @@ namespace ChessRPGMac
                     sourceRectangle: new Rectangle(0, 0, FRAME_WIDTH, FRAME_HEIGHT), color: Color.White);
                 // Draw Gagebars.
                 spriteBatch.Draw(gageTexture, new Vector2(x + GAGEBARSTART_X, y + GAGEBARSTART_Y),
-                    sourceRectangle: new Rectangle(0, FRAME_HEIGHT, (int)(GAGEBAR_WIDTH * ((float)hero.HP / hero.maxHp)), GAGEBAR_HEIGHT),
+                    sourceRectangle: new Rectangle(0, FRAME_HEIGHT, (int)(GAGEBAR_WIDTH * ((float)HP / hero.maxHp)), GAGEBAR_HEIGHT),
                     color: Color.White);
                 spriteBatch.Draw(gageTexture, new Vector2(x + GAGEBARSTART_X, y + GAGEBARSTART_Y + (GAGEBAR_HEIGHT + GAGEBAR_GAP)),
-                    sourceRectangle: new Rectangle(0, FRAME_HEIGHT + GAGEBAR_HEIGHT, (int)(GAGEBAR_WIDTH * (hero.SP / 100)), GAGEBAR_HEIGHT),
+                    sourceRectangle: new Rectangle(0, FRAME_HEIGHT + GAGEBAR_HEIGHT, (int)(GAGEBAR_WIDTH * (SP / 100)), GAGEBAR_HEIGHT),
                     color: Color.White);
                 spriteBatch.Draw(gageTexture, new Vector2(x + GAGEBARSTART_X, y + GAGEBARSTART_Y + (GAGEBAR_HEIGHT + GAGEBAR_GAP) * 2),
-                    sourceRectangle: new Rectangle(0, FRAME_HEIGHT + GAGEBAR_HEIGHT * 2, (int)(GAGEBAR_WIDTH * (hero.AP / 100)), GAGEBAR_HEIGHT),
+                    sourceRectangle: new Rectangle(0, FRAME_HEIGHT + GAGEBAR_HEIGHT * 2, (int)(GAGEBAR_WIDTH * (AP / 100)), GAGEBAR_HEIGHT),
                     color: Color.White);
                 spriteBatch.End();
             }
@@ -52,8 +56,11 @@ namespace ChessRPGMac
 
         public override void Update(GameTime gameTime)
         {
-            relativeX = heroObject.x - FRAME_WIDTH / 2;
-            relativeY = heroObject.y + FIGHTER_GAGE_GAP;
+            HP = hero.HP;
+            SP = hero.SP;
+            AP = hero.AP;
+            relativeX = heroObject.x - FRAME_WIDTH / 2 - Global.camera.x;
+            relativeY = heroObject.y + FIGHTER_GAGE_GAP - Global.camera.y;
         }
     }
 
@@ -100,8 +107,8 @@ namespace ChessRPGMac
 
         public override void Update(GameTime gameTime)
         {
-            relativeX = enemyObject.x - FRAME_WIDTH / 2;
-            relativeY = enemyObject.y - enemy.sprite.height - 20;
+            relativeX = enemyObject.x - FRAME_WIDTH / 2 - Global.camera.x;
+            relativeY = enemyObject.y - enemy.sprite.height - 20 - Global.camera.y;
         }
     }
 }

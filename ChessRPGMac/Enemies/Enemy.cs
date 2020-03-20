@@ -7,7 +7,7 @@ namespace ChessRPGMac
     {
         public int phase { get; protected set; }
 
-        Queue<EnemySkill> pattern;
+        protected Queue<EnemySkill> pattern;
 
         public Enemy(FighterState state)
         {
@@ -15,6 +15,7 @@ namespace ChessRPGMac
                 state = FighterState.Front;
             this.state = state;
             pattern = new Queue<EnemySkill>();
+            phase = 0;
         }
 
         public override bool ChangeState(FighterState state)
@@ -25,7 +26,14 @@ namespace ChessRPGMac
             return true;
         }
 
-        public abstract void PhaseCheck();
+        public EnemySkill GetAction()
+        {
+            if (pattern.Count == 0)
+                CreatePattern();
+            return pattern.Dequeue();
+        }
+
+        public abstract void PhaseCheck(BattleStage stage);
         protected abstract void CreatePattern();
     }
 }

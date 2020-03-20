@@ -7,6 +7,8 @@ namespace ChessRPGMac
     public class SlashEffect : PointEffect
     {
         Sprite sprite;
+        int timespan = 0;
+        int lastTimespan = 10;
 
         public SlashEffect(int x, int y, int depth) : base(x, y, depth)
         {
@@ -18,7 +20,11 @@ namespace ChessRPGMac
         {
             sprite.Update(gameTime);
             if (!sprite.animating)
-                Finish();
+            {
+                timespan++;
+                if (timespan >= lastTimespan)
+                    Finish();
+            }
             base.Update(gameTime);
         }
 

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Audio;
 
 namespace ChessRPGMac
 {
@@ -50,6 +51,11 @@ namespace ChessRPGMac
         private const int COLLIDER_WIDTH = 30;
         private const int COLLIDER_HEIGTH = 16;
 
+        SoundEffect grassWalk_soundEffect;
+        bool soundPlaying;
+
+        int timespan_sound;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="T:ChessRPGMac.Player"/> class.
         /// It must be called in <see cref="Game.LoadContent"/> method.
@@ -58,6 +64,8 @@ namespace ChessRPGMac
         /// <param name="y">The y coordinate.</param>
         private Player(int x, int y) : base(x, y)
         {
+            grassWalk_soundEffect = Global.content.Load<SoundEffect>("SE_GrassWalk");
+
             // Get Sprites from SpriteBox.
             spritesNoLantern = new Sprite[4];
             spritesNoLantern[0] = Global.spriteBox.Pick("PlayerNoLantern_Down");
@@ -128,7 +136,16 @@ namespace ChessRPGMac
                     y -= (direction * 2 - 1) * moveSpeed;
                 else if (direction == 2 || direction == 3)
                     x -= ((direction - 2) * 2 - 1) * moveSpeed;
+
+                timespan_sound--;
+                if (timespan_sound <= 0)
+                {
+                    grassWalk_soundEffect.Play(0.5f, 0, 0);
+                    timespan_sound = currentSprite.interval * 2;
+                }
             }
+            else
+                timespan_sound = 0;
 
             // Set Collider position.
             ((SquareCollider)collider).x = x;

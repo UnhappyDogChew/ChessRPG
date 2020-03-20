@@ -1,5 +1,5 @@
 ﻿using System;
-
+using System.Collections.Generic;
 using Microsoft.Xna.Framework.Graphics;
 
 namespace ChessRPGMac
@@ -7,16 +7,21 @@ namespace ChessRPGMac
     public abstract class Skill : Action
     {
         public Texture2D icon { get; protected set; }
-        public Hero user { get; protected set; }
         public int manaUsage { get; protected set; }
+        public int hpUsage { get; protected set; }
         public bool isActive { get; protected set; }
 
-        public Skill(Hero user) { this.user = user; }
-
-        public virtual bool IsAvailable(BattleStage stage)
+        public override bool IsAvailable(BattleStage stage, FighterObject user)
         {
-            return user.SP >= manaUsage;
+            return ((Hero)user.fighter).SP >= manaUsage;
         }
+
+        public override void Execute(BattleStage stage, FighterObject user, List<FighterObject> targetList, ActionFinishHandler handler)
+        {
+            ((Hero)user.fighter).DecreaseSP(manaUsage);
+        }
+
+        public abstract string GetDescription();
     }
     /// <summary>
     /// Melee attack. Only attacks front enemy. 
@@ -24,7 +29,7 @@ namespace ChessRPGMac
     /// </summary>
     public class MeleeAttack : Skill
     {
-        public MeleeAttack(Hero user) : base(user)
+        public MeleeAttack()
         {
             icon = Global.content.Load<Texture2D>("MeleeAttack");
             name = "Melee Attack";
@@ -33,24 +38,23 @@ namespace ChessRPGMac
             targetType = TargetType.OneEnemyFront;
         }
 
-        public override bool IsAvailable(BattleStage stage)
+        public override bool IsAvailable(BattleStage stage, FighterObject user)
         {
-            return user.state == FighterState.Front;
+            return user.fighter.state == FighterState.Front;
         }
 
-        public override void PreAction(BattleStage stage, FighterObject user, FighterObject target)
+        public override void Execute(BattleStage stage, FighterObject user, List<FighterObject> targetList, ActionFinishHandler handler)
         {
-            SlashEffect effect = new SlashEffect(target.x, target.y, 0);
-            bottomEffectLayer.elements.Add(effect);
-            user.MeleeAttack();
-            effect.EffectFinishEvent += (e) => DoAction(stage, user, target);
-        }
+            PresentationGroup p = new PresentationGroup(2, stage, user, targetList, handler);
+            p[0].AddEffect(new SlashEffect(targetList[0].x, targetList[0].y, 0));
+            p[0].SetUserAnimation(SpriteAnimation.GetSpriteAnimation("MeleeAttackUp"));
 
-        public override void DoAction(BattleStage stage, FighterObject user, FighterObject target)
-        {
-            target.Attacked();
-            target.animationFinishHandler = () => { PostAction(stage, user, target); };
-            target.DealDamage(this.user.strength);
+            p[1].SetTargetAnimation(SpriteAnimation.GetSpriteAnimation("Shake"));
+            p[1].AddEffect(targetList[0].DealDamage(((Hero)user.fighter).strength));
+
+            p.Start();
+
+            base.Execute(stage, user, targetList, handler);
         }
 
         public override string GetDescription()
@@ -63,7 +67,7 @@ namespace ChessRPGMac
     /// </summary>
     public class RangeAttack : Skill
     {
-        public RangeAttack(Hero user) : base(user)
+        public RangeAttack()
         {
             icon = Global.content.Load<Texture2D>("RangeAttack");
             name = "Range Attack";
@@ -72,16 +76,56 @@ namespace ChessRPGMac
             targetType = TargetType.OneEnemyFront;
         }
 
-        public override void DoAction(BattleStage stage, FighterObject user, FighterObject target)
+        public override void Execute(BattleStage stage, FighterObject user, List<FighterObject> targetList, ActionFinishHandler handler)
         {
-            target.DealDamage(this.user.strength);
+            PresentationGroup p = new PresentationGroup(2, stage, user, targetList, handler);
+            p[0].AddEffect(new SlashEffect(targetList[0].x, targetList[0].y, 0));
+            p[0].SetUserAnimation(SpriteAnimation.GetSpriteAnimation("MeleeAttackUp"));
 
-            base.DoAction(stage, user, target);
+            p[1].AddEffect(targetList[0].DealDamage(user.fighter.strength));
+            p[1].SetTargetAnimation(SpriteAnimation.GetSpriteAnimation("Shake"));
+
+            p.Start();
+
+            base.Execute(stage, user, targetList, handler);
         }
 
         public override string GetDescription()
         {
             return "Attack front enemy. Can attack when user is in behind.";
+        }
+    }
+
+    public class MoveAction : Skill
+    {
+        public MoveAction()
+        {
+            icon = Global.content.Load<Texture2D>("HealIcon");
+            name = "Move";
+            manaUsage = 0;
+            targetType = TargetType.OneAlleyOtherLine;
+            isActive = true;
+        }
+
+        public override bool IsAvailable(BattleStage stage, FighterObject user)
+        {
+            if (user.fighter.state == FighterState.Front)
+                return (stage.fighterLists[3].Count < 5 && (stage.fighterLists[2].Count > 1 || 
+                    (stage.fighterLists[2].Count == 1 && stage.fighterLists[3].Count > 0)));
+            else
+                return stage.fighterLists[2].Count < 5;
+        }
+
+        public override string GetDescription()
+        {
+            return "Move to other line or switch line with other alley.";
+        }
+
+        public override void Execute(BattleStage stage, FighterObject user, List<FighterObject> targetList, ActionFinishHandler handler)
+        {
+            stage.SwitchLocation(user, targetList[0]);
+            handler(null);
+            base.Execute(stage, user, targetList, handler);
         }
     }
 }

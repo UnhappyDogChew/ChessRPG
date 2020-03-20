@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
+using Microsoft.Xna.Framework.Graphics;
+
 namespace ChessRPGMac
 {
     public class Hero2 : Hero
@@ -13,15 +16,86 @@ namespace ChessRPGMac
             HeroElement = Element.Earth;
             maxHp = 700;
             mana = 10;
-            speed = 20;
+            speed = 40;
             strength = 40;
             intelligence = 15;
             defense = 25;
 
-            attacks = new Skill[] { new MeleeAttack(this) };
-            skills = new Skill[] { null, null, null, null, null };
+            attacks = new Skill[] { new MeleeAttack() };
+            skills = new Skill[] { new BloodySlash(), new FrozenSlash(), null, null, null };
 
             Reset();
+        }
+    }
+
+    public class BloodySlash : Skill
+    {
+        public BloodySlash()
+        {
+            name = "Bloody Slash";
+            hpUsage = 50;
+            targetType = TargetType.OneEnemyFront;
+            isActive = true;
+            icon = Global.content.Load<Texture2D>("MeleeAttack");
+        }
+
+        public override bool IsAvailable(BattleStage stage, FighterObject user)
+        {
+            return (user.fighter.HP > hpUsage);
+        }
+
+        public override void Execute(BattleStage stage, FighterObject user, List<FighterObject> targetList, ActionFinishHandler handler)
+        {
+            PresentationGroup p = new PresentationGroup(3, stage, user, targetList, handler);
+            p[0].AddEffect(user.DealDamage(hpUsage));
+
+            p[1].AddEffect(new SlashEffect(targetList[0].x, targetList[0].y, 0));
+            p[1].SetUserAnimation(SpriteAnimation.GetSpriteAnimation("MeleeAttackUp"));
+
+            p[2].SetTargetAnimation(SpriteAnimation.GetSpriteAnimation("Shake"));
+            p[2].AddEffect(targetList[0].DealDamage(((Hero)user.fighter).strength * 2));
+
+            p.Start();
+
+            base.Execute(stage, user, targetList, handler);
+        }
+
+        public override string GetDescription()
+        {
+            return "Reduce user's HP, and deals extreme damage to single front enemy.";
+        }
+    }
+
+    public class FrozenSlash : Skill
+    {
+        public FrozenSlash()
+        {
+            name = "Frozen Slash";
+            manaUsage = 50;
+            targetType = TargetType.OneEnemyFront;
+            isActive = true;
+            icon = Global.content.Load<Texture2D>("MeleeAttack");
+        }
+
+        public override void Execute(BattleStage stage, FighterObject user, List<FighterObject> targetList, ActionFinishHandler handler)
+        {
+            PresentationGroup p = new PresentationGroup(3, stage, user, targetList, handler);
+            p[0].AddEffect(new SlashEffect(targetList[0].x, targetList[0].y, 0));
+            p[0].SetUserAnimation(SpriteAnimation.GetSpriteAnimation("MeleeAttackUp"));
+
+            p[1].SetTargetAnimation(SpriteAnimation.GetSpriteAnimation("Shake"));
+            p[1].AddEffect(targetList[0].DealDamage(((Hero)user.fighter).strength));
+
+            p[2].SetExtraMethod(() => targetList[0].AddBuff(new Frozen(), Global.Properties.FRAME_PER_SECOND * 3));
+
+            p.Start();
+
+            base.Execute(stage, user, targetList, handler);
+        }
+
+        public override string GetDescription()
+        {
+            return "Attack a front enemy and freeze it.";
         }
     }
 }

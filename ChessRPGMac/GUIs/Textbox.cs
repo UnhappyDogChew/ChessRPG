@@ -50,7 +50,7 @@ namespace ChessRPGMac
             characterIndex = 0;
             line = 0;
             lineWidth = 0;
-            fontColor = Color.Black;
+            fontColor = Color.White;
             isEnd = false;
             starting = true;
             yScale = 0.1f;

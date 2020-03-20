@@ -21,6 +21,7 @@ namespace ChessRPGMac
             public static readonly int GAME_WIDTH = 512;
             public static readonly int GAME_HEIGHT = 704;
             public static readonly int FIGHTER_IN_ROW = 5;
+            public static readonly int FRAME_PER_SECOND = 60;
 
             public static bool fastMode = false;
         }

@@ -92,12 +92,7 @@ namespace ChessRPGMac
             else
                 throw new InvalidFighterObjectException();
 
-            if (fighterLists[index].Remove(fighterObject))
-            {
-                fighterObject.Finish();
-                return true;
-            }
-            return false;
+            return fighterLists[index].Remove(fighterObject);
         }
 
         public void SwitchLocation(FighterObject fighterObject1, FighterObject fighterObject2)

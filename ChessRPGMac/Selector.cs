@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Audio;
 
 namespace ChessRPGMac
 {
@@ -14,6 +14,9 @@ namespace ChessRPGMac
 
     public class Selector
     {
+        SoundEffect menuSelect_soundEffect;
+        SoundEffect menuDecide_soundEffect;
+
         Dictionary<string, ISelectable[,]> matrices;
         Stack<string> nameStack;
         Stack<Point> cursorStack;
@@ -60,6 +63,8 @@ namespace ChessRPGMac
 
         public Selector(bool mirrorMode = false)
         {
+            menuSelect_soundEffect = Global.content.Load<SoundEffect>("SE_Menu5");
+            menuDecide_soundEffect = Global.content.Load<SoundEffect>("SE_Menu3");
             cursor = new Point(-1, -1);
             topEffectLayer = (EffectLayer)Global.world.GetLayer("TopEffectLayer");
             matrices = new Dictionary<string, ISelectable[,]>();
@@ -253,6 +258,7 @@ namespace ChessRPGMac
             try
             {
                 currentSelectable?.SelectAction();
+                menuDecide_soundEffect.Play(0.5f, 0, 0);
             }
             catch (Exception e)
             {
@@ -435,6 +441,7 @@ namespace ChessRPGMac
                     selectingEffect.width = s.x;
                     selectingEffect.height = s.y;
                 }
+                menuSelect_soundEffect.Play(0.2f, 0, 0);
             }
             catch (Exception e)
             {

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Microsoft.Xna.Framework.Audio;
 
 namespace ChessRPGMac
 {
@@ -11,6 +12,7 @@ namespace ChessRPGMac
     {
         bool transforming;
         bool timePaused;
+        bool targetBufferFilled;
 
         int timespan;
 
@@ -29,7 +31,12 @@ namespace ChessRPGMac
         SelectedEffect selectedEffect;
 
         FighterObject actingFighterObject;
-        Action currentAction;
+        Skill currentAction;
+        List<FighterObject> targetBuffer;
+        Queue<FighterObject> readiedFighterObjects;
+        Queue<BuffAction> readiedBuff;
+
+        SoundEffect menuSelect_soundEffect;
 
         const int TRANSFORMING_TIME = 90;
         const int PLAYEROFFSET_Y = 207;
@@ -73,6 +80,8 @@ namespace ChessRPGMac
                     }
                     foreach (Hero hero in player.heros)
                     {
+                        if (hero.state == FighterState.Stored)
+                            continue;
                         HeroObject heroObject = new HeroObject(0, 0, hero);
                         guiLayer.AddGUI(new HeroGages(hero.name + "Gages", null, heroObject));
                         stage.AddFighterObject(heroObject);
@@ -102,24 +111,75 @@ namespace ChessRPGMac
             {
                 if (timePaused)
                 {
+                    // If targetBuffer is filled, do current action.
+                    if (targetBuffer.Count > 0 && targetBufferFilled)
+                    {
+                        currentAction?.Execute(stage, actingFighterObject, targetBuffer, SummonFighterObject);
+                        actionMenu.Deactivate();
+                        actionSelect.Deactivate();
+                        instruction.Deactivate();
+                        selector.Reset();
+                        targetBufferFilled = false;
+                        return;
+                    }
                     KeyCheck();
                 }
                 else
                 {
-                    //UpdateBattleStage();
-                    foreach (FighterObject fighterObject in stage)
+                    if (readiedBuff.Count > 0)
                     {
-                        if (fighterObject == null)
-                            continue;
+                        timePaused = true;
+                        BuffAction buffAction = readiedBuff.Dequeue();
 
-                        Fighter fighter = fighterObject.fighter;
-
-                        if (fighter.IncreaseAP(60))
+                        switch (buffAction.method)
                         {
-                            actingFighterObject = fighterObject;
-                            if (fighter is Hero)
+                            case "Start": buffAction.buff.Start(SummonFighterObject); break;
+                            case "Finish": buffAction.buff.Finish(SummonFighterObject); break;
+                            case "Attack": buffAction.buff.Attack(SummonFighterObject); break;
+                            case "Hit": buffAction.buff.Hit(SummonFighterObject); break;
+                            case "Ready": buffAction.buff.Ready(SummonFighterObject); break;
+                            case "Tick": buffAction.buff.Tick(SummonFighterObject); break;
+                        }
+                    }
+                    else if (readiedFighterObjects.Count > 0)
+                    {
+                        timePaused = true;
+                        actingFighterObject = readiedFighterObjects.Dequeue();
+                        // Check if fighter is paused.
+                        while (actingFighterObject.fighter.paused)
+                        {
+                            actingFighterObject = readiedFighterObjects.Dequeue();
+                        }
+
+                        if (actingFighterObject.fighter is Hero)
+                        {
+                            ActionMenuEnable((HeroObject)actingFighterObject);
+                        }
+
+                        if (actingFighterObject.fighter is Enemy)
+                        {
+                            EnemySkill enemySkill = ((Enemy)actingFighterObject.fighter).GetAction();
+                            enemySkill.Execute(stage, actingFighterObject, enemySkill.SelectTarget(stage), SummonFighterObject);
+                        }
+                    }
+                    else
+                    {
+                        foreach (FighterObject fighterObject in stage)
+                        {
+                            if (fighterObject == null)
+                                continue;
+
+                            if (fighterObject.fighter.IncreaseGage(60))
+                                readiedFighterObjects.Enqueue(fighterObject);
+
+                            foreach (Buff buff in fighterObject.buffList)
                             {
-                                ActionMenuEnable((HeroObject)fighterObject);
+                                buff.Update(gameTime);
+                                string method = buff.TriggerCheck();
+                                if (method != "")
+                                {
+                                    readiedBuff.Enqueue(new BuffAction(buff, method));
+                                }
                             }
                         }
                     }
@@ -129,39 +189,70 @@ namespace ChessRPGMac
             base.Update(gameTime);
         }
 
+        private void RestartTime()
+        {
+            actingFighterObject.fighter.ResetAP();
+            timePaused = false;
+        }
+
         private void UpdateFighterObjectLocations()
         {
-            SetFighterGroupMatrix();
-            actingFighterObject.fighter.ResetAP();
             selectedEffect?.Finish();
             selectedEffect = null;
-            timePaused = false;
+
+            SetFighterGroupMatrix();
+
+            if (SetFighterObjects())
+            {
+                Timer timer = new Timer(20);
+                TaskManager task = new TaskManager(timer);
+                topEffectLayer.elements.Add(timer);
+                task.TaskFinished += (t) => { RestartTime(); };
+                task.StartTask();
+                return;
+            }
+            RestartTime();
         }
 
         private void RemoveDeadFighters()
         {
-            foreach (FighterObject fighterObject in stage)
+            for (int row = 0; row < 4; row++)
             {
-                if (!fighterObject.fighter.alive)
+                for (int col = 0; col < stage.fighterLists[row].Count; col++)
                 {
-                    fighterObject.Kill();
-                    stage.RemoveFighterObject(fighterObject);
+                    if (!stage.fighterLists[row][col].fighter.alive)
+                    {
+                        stage.fighterLists[row][col].Kill();
+                        stage.RemoveFighterObject(stage.fighterLists[row][col]);
+                    }
                 }
             }
+            RemoveNullFighterObjects();
             UpdateFighterObjectLocations();
+        }
+
+        private void SummonFighterObject(FighterObject summon)
+        {
+            if (summon != null)
+                stage.AddFighterObject(summon);
+            RemoveDeadFighters();
         }
 
         public void AddTargetBuffer(FighterObject target)
         {
-            currentAction?.Execute(stage, actingFighterObject, target, RemoveDeadFighters);
-            actionMenu.Deactivate();
-            actionSelect.Deactivate();
-            instruction.Deactivate();
-            selector.Reset();
+            targetBuffer.Add(target);
+            targetBufferFilled = true;
         }
 
-        public void SelectTarget(Action action)
+        #region Hero Action Select Methods.
+        public void TargetSelectEnable(Skill action)
         {
+            if (!action.IsAvailable(stage, actingFighterObject))
+            {
+                return;
+            }
+
+            targetBuffer.Clear();
             currentAction = action;
             selector.ChangeMatrix("FighterGroup");
 
@@ -186,7 +277,7 @@ namespace ChessRPGMac
                         stage.AddFighterObject(nullFighterObject);
                     }
                 }
-                else if (actingFighterObject.fighter.state == FighterState.Front)
+                else if (actingFighterObject.fighter.state == FighterState.Front && stage.fighterLists[2].Count > 1)
                 {
                     // Behind
                     int heroBehindCount = stage.fighterLists[(int)StageRow.HeroBehind].Count;
@@ -262,7 +353,7 @@ namespace ChessRPGMac
             {
                 case "Attack": actionSelect.SetActions(((Hero)actingFighterObject.fighter).attacks); break;
                 case "Skill": actionSelect.SetActions(((Hero)actingFighterObject.fighter).skills); break;
-                case "Move": actionSelect.SetActions(new Action[] { new MoveAction() }); break;
+                case "Move": actionSelect.SetActions(new Skill[] { new MoveAction() }); break;
             }
         }
 
@@ -274,8 +365,9 @@ namespace ChessRPGMac
             selector.ResetConstraint();
             selector.ChangeSelectMode(SelectMode.One);
             selector.SelectFirstItem();
-            timePaused = true;
         }
+        #endregion
+
         /// <summary>
         /// Check Combat's Enemy list and summon them in the <see cref=" BattleStage"/>.
         /// </summary>
@@ -341,7 +433,7 @@ namespace ChessRPGMac
             }
         }
 
-        private void SetFighterObjects()
+        private bool SetFighterObjects()
         {
             int enemyFrontStartX = (Global.camera.width - (stage.fighterLists[1].Count - 1) * ENEMY_GAP_X) / 2;
             int enemyBehindStartX = (Global.camera.width - (stage.fighterLists[0].Count - 1) * ENEMY_GAP_X) / 2;
@@ -352,6 +444,8 @@ namespace ChessRPGMac
             int enemyFrontCount = 0;
             int enemyBehindCount = 0;
 
+            bool isMoved = false;
+
             foreach (FighterObject fighterObject in stage)
             {
                 if (fighterObject is EnemyObject || 
@@ -359,14 +453,16 @@ namespace ChessRPGMac
                 {
                     if (fighterObject.fighter.state == FighterState.Behind)
                     {
-                        fighterObject.MoveLocation(new Point(Global.camera.x + enemyBehindStartX + ENEMY_GAP_X * enemyBehindCount,
-                            Global.camera.y + ENEMYFRONT_Y + ENEMY_GAP_Y));
+                        if (fighterObject.MoveLocation(new Point(Global.camera.x + enemyBehindStartX + ENEMY_GAP_X * enemyBehindCount,
+                            Global.camera.y + ENEMYFRONT_Y + ENEMY_GAP_Y)))
+                            isMoved = true;
                         enemyBehindCount++;
                     }
                     else
                     {
-                        fighterObject.MoveLocation(new Point(Global.camera.x + enemyFrontStartX + ENEMY_GAP_X * enemyFrontCount,
-                            Global.camera.y + ENEMYFRONT_Y));
+                        if (fighterObject.MoveLocation(new Point(Global.camera.x + enemyFrontStartX + ENEMY_GAP_X * enemyFrontCount,
+                            Global.camera.y + ENEMYFRONT_Y)))
+                            isMoved = true;
                         enemyFrontCount++;
                     }
                 }
@@ -374,36 +470,54 @@ namespace ChessRPGMac
                 {
                     if (fighterObject.fighter.state == FighterState.Front)
                     {
-                        fighterObject.MoveLocation(new Point(Global.camera.x + heroFrontStartX + ENEMY_GAP_X * heroFrontCount,
-                            Global.camera.y + HEROFRONT_Y));
+                        if (fighterObject.MoveLocation(new Point(Global.camera.x + heroFrontStartX + HERO_GAP_X * heroFrontCount,
+                            Global.camera.y + HEROFRONT_Y)))
+                            isMoved = true;
                         heroFrontCount++;
                     }
                     else
                     {
-                        fighterObject.MoveLocation(new Point(Global.camera.x + heroBehindStartX + HERO_GAP_X * heroBehindCount,
-                            Global.camera.y + HEROBEHIND_Y));
+                        if (fighterObject.MoveLocation(new Point(Global.camera.x + heroBehindStartX + HERO_GAP_X * heroBehindCount,
+                            Global.camera.y + HEROBEHIND_Y)))
+                            isMoved = true;
                         heroBehindCount++;
                     }
                 }
             }
+            return isMoved;
         }
 
         private void SetFighterGroupMatrix()
         {
             selector.ClearMatrix("FighterGroup");
-            int col = 0;
-            int row = 0;
+            int enemyBehindCount = 0;
+            int enemyFrontCount = 0;
+            int heroFrontCount = 0;
+            int heroBehindCount = 0;
             foreach (FighterObject fighterObject in stage)
             {
                 if (fighterObject == null)
                     continue;
-                if ((row == 0 && fighterObject is EnemyObject && ((EnemyObject)fighterObject).enemy.state == FighterState.Front) ||
-                    (row == 1 && fighterObject is HeroObject) ||
-                    (row == 2 && fighterObject is HeroObject && ((HeroObject)fighterObject).hero.state == FighterState.Behind))
+                if (fighterObject is EnemyObject && fighterObject.fighter.state == FighterState.Behind)
                 {
-                    col = 0; row++;
+                    selector.SetItemToMatrix("FighterGroup", fighterObject, 0, enemyBehindCount);
+                    enemyBehindCount++;
                 }
-                selector.SetItemToMatrix("FighterGroup", fighterObject, row, col++);
+                else if (fighterObject is EnemyObject && fighterObject.fighter.state == FighterState.Front)
+                {
+                    selector.SetItemToMatrix("FighterGroup", fighterObject, 1, enemyFrontCount);
+                    enemyBehindCount++;
+                }
+                else if (fighterObject is HeroObject && fighterObject.fighter.state == FighterState.Front)
+                {
+                    selector.SetItemToMatrix("FighterGroup", fighterObject, 2, heroFrontCount);
+                    heroFrontCount++;
+                }
+                else if (fighterObject is HeroObject && fighterObject.fighter.state == FighterState.Behind)
+                {
+                    selector.SetItemToMatrix("FighterGroup", fighterObject, 3, heroBehindCount);
+                    heroBehindCount++;
+                }
             }
         }
 
@@ -475,6 +589,10 @@ namespace ChessRPGMac
             guiLayer = (GUILayer)Global.world.GetLayer("GUILayer");
             gameObjectLayer = (GameObjectLayer)Global.world.GetLayer("GameObjectLayer");
             topEffectLayer = (EffectLayer)Global.world.GetLayer("TopEffectLayer");
+
+            targetBuffer = new List<FighterObject>();
+            readiedFighterObjects = new Queue<FighterObject>();
+            readiedBuff = new Queue<BuffAction>();
 
             player.Look(Direction.Up);
             player.Stand();

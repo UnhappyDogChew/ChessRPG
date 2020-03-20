@@ -14,7 +14,7 @@ namespace ChessRPGMac
         int interval = 2;
         int[] animation = { -2, -6, -7, -6, -4, 0 };
         int index;
-        int lastTimespan = 30;
+        int lastTimespan = 40;
         bool animationFinished = false;
 
         public DamageEffect(int damage, int x, int y, int depth) : base(x, y, depth)

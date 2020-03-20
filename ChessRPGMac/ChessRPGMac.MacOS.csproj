@@ -86,7 +86,6 @@
     <Compile Include="Global.cs" />
     <Compile Include="Layers\GUILayer.cs" />
     <Compile Include="States\TeamManageState.cs" />
-    <Compile Include="Buff.cs" />
     <Compile Include="GUIs\TeamManagement.cs" />
     <Compile Include="Camera.cs" />
     <Compile Include="GUIs\HeroSummary.cs" />
@@ -116,7 +115,6 @@
     <Compile Include="GameObjects\EnemySoul.cs" />
     <Compile Include="GUIs\ActionMenu.cs" />
     <Compile Include="GUIs\ActionSelect.cs" />
-    <Compile Include="Heros\Action.cs" />
     <Compile Include="Enemies\EnemySkill.cs" />
     <Compile Include="Selector.cs" />
     <Compile Include="Strings.Designer.cs">
@@ -126,6 +124,12 @@
     <Compile Include="Effects\SlashEffect.cs" />
     <Compile Include="SpriteAnimation.cs" />
     <Compile Include="Effects\DamageEffect.cs" />
+    <Compile Include="Action.cs" />
+    <Compile Include="ITask.cs" />
+    <Compile Include="TaskManager.cs" />
+    <Compile Include="Presentation.cs" />
+    <Compile Include="Buffs\Buff.cs" />
+    <Compile Include="Buffs\Frozen.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Info.plist" />
@@ -167,6 +171,7 @@
     <Folder Include="Heros\" />
     <Folder Include="Enemies\" />
     <Folder Include="Effects\" />
+    <Folder Include="Buffs\" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\Mac\Xamarin.Mac.CSharp.targets" />
   <Import Project="$(MSBuildExtensionsPath)\MonoGame\v3.0\MonoGame.Content.Builder.targets" />

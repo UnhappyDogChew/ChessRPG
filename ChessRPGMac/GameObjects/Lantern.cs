@@ -43,7 +43,7 @@ namespace ChessRPGMac
             textList.Add("You found a lantern.<w>");
             textList.Add("This is another text for debug. <n><r:10>what is the problem?<w>");
 
-            InteractionTextbox = new Textbox("Textbox", null, 0, 100, textList, Global.content.Load<SpriteFont>("neodgm12"));
+            InteractionTextbox = new Textbox("Textbox", null, 0, 100, textList, Global.content.Load<SpriteFont>("neodgm22"));
         }
 
         public override void Finish()
