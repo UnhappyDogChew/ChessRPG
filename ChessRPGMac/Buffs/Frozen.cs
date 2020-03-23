@@ -16,7 +16,7 @@ namespace ChessRPGMac
 
         public override void Update(GameTime gameTime)
         {
-            target.fighter.paused = true;
+            target.paused = true;
             base.Update(gameTime);
         }
 
@@ -24,7 +24,7 @@ namespace ChessRPGMac
         {
             effect = new FrozenEffect(target.x, target.y, 0);
             bottomEffectLayer.elements.Add(effect);
-            target.fighter.paused = true;
+            target.paused = true;
             handler(null);
             base.Start(handler);
         }
@@ -32,7 +32,7 @@ namespace ChessRPGMac
         public override void Finish(ActionFinishHandler handler)
         {
             effect.Finish();
-            target.fighter.paused = false;
+            target.paused = false;
             handler(null);
             base.Finish(handler);
         }

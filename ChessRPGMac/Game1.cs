@@ -74,12 +74,15 @@ namespace ChessRPGMac.MacOS
             GOLayer.elements.Add(Player.GetPlayer(100, 100));
             GOLayer.elements.Add(new Boundary(300, 300));
             GOLayer.elements.Add(new Lantern(200, 200));
-            List<Enemy> enemyList = new List<Enemy>();
-            enemyList.Add(new Goul(FighterState.Front));
-            GOLayer.elements.Add(new EnemySoul(400, 400, new Combat(enemyList)));
+            List<Enemy> enemyFrontList = new List<Enemy>();
+            List<Enemy> enemyBehindList = new List<Enemy>();
+            enemyFrontList.Add(new Goul());
+            GOLayer.elements.Add(new EnemySoul(400, 400, new Combat(enemyFrontList, enemyBehindList)));
 
-            Hero1 hero = new Hero1();
-            Hero2 hero2 = new Hero2();
+            Global.soulBox = new SoulBox();
+
+            Hero1 hero = new Hero1(FighterState.Front);
+            Hero2 hero2 = new Hero2(FighterState.Front);
             Ring1 ring1 = new Ring1();
             Global.world.GetPlayer().AddHero(hero);
             Global.world.GetPlayer().AddHero(hero2);

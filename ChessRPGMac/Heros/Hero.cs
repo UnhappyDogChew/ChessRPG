@@ -15,10 +15,13 @@ namespace ChessRPGMac
         public int soul { get; protected set; }
         public float mana { get; protected set; }
 
-        public float SP { get; protected set; }
-
-        public Class HeroClass { get; protected set; }
-        public Element HeroElement { get; protected set; }
+        public Class heroClass { get; protected set; }
+        public Element heroElement { get; protected set; }
+        /// <summary>
+        /// Rarity is between 0 ~ 4.
+        /// </summary>
+        /// <value>The rarity.</value>
+        public int rarity { get; protected set; }
 
         public static int[] SoulPerLevel = { 1, 1, 2, 2, 4 };
 
@@ -32,36 +35,16 @@ namespace ChessRPGMac
         public Skill[] attacks { get; protected set; }
         public Skill[] skills { get; protected set; }
 
-        public Hero()
+        public FighterState defaultFighterState { get; private set; }
+
+        public Hero(FighterState defaultFighterState)
         {
+            this.defaultFighterState = defaultFighterState;
         }
 
-        public override void Reset()
+        public void ChangeDefaultState(FighterState state)
         {
-            HP = maxHp;
-            SP = 0;
-            AP = 0;
-        }
-
-        public override bool IncreaseGage(int framePerSecond)
-        {
-            IncreaseSP((float)mana / framePerSecond);
-
-            return base.IncreaseGage(framePerSecond);
-        }
-
-        public void IncreaseSP(float increase)
-        {
-            SP += increase;
-            if (SP > 100)
-                SP = 100;
-        }
-
-        public void DecreaseSP(float decrease)
-        {
-            SP -= decrease;
-            if (SP < 0)
-                SP = 0;
+            this.defaultFighterState = state;
         }
     }
 }

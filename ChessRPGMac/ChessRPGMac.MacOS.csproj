@@ -130,6 +130,9 @@
     <Compile Include="Presentation.cs" />
     <Compile Include="Buffs\Buff.cs" />
     <Compile Include="Buffs\Frozen.cs" />
+    <Compile Include="States\SoulPurifyState.cs" />
+    <Compile Include="GameObjects\Soul.cs" />
+    <Compile Include="SoulBox.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Info.plist" />

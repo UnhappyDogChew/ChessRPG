@@ -197,12 +197,12 @@ namespace ChessRPGMac
                 heros.Add(hero);
                 if (HeroFrontAmount < HEROFRONT_MAX)
                 {
-                    hero.ChangeState(FighterState.Front);
+                    hero.ChangeDefaultState(FighterState.Front);
                     HeroFrontAmount++;
                 }
                 else
                 {
-                    hero.ChangeState(FighterState.Behind);
+                    hero.ChangeDefaultState(FighterState.Behind);
                     HeroBehindAmount++;
                 }
                 return true;
@@ -210,7 +210,7 @@ namespace ChessRPGMac
             else if (HeroStoredAmount < HEROSTORED_MAX)
             {
                 heros.Add(hero);
-                hero.ChangeState(FighterState.Stored);
+                hero.ChangeDefaultState(FighterState.Stored);
                 HeroStoredAmount++;
                 return true;
             }
@@ -339,27 +339,6 @@ namespace ChessRPGMac
             holdingLantern = true;
             SetSprite();
         }
-
-        public int GetAliveFrontCount()
-        {
-            int result = 0;
-            foreach (Hero hero in heros)
-            {
-                if (hero.state == FighterState.Front && hero.alive)
-                    result++;
-            }
-            return result;
-        }
-        public int GetAliveBehindCount()
-        {
-            int result = 0;
-            foreach (Hero hero in heros)
-            {
-                if (hero.state == FighterState.Behind && hero.alive)
-                    result++;
-            }
-            return result;
-        }
         /// <summary>
         /// Sets player sprite.
         /// </summary>
@@ -377,7 +356,7 @@ namespace ChessRPGMac
             HeroStoredAmount = 0;
             foreach (Hero hero in heros)
             {
-                switch (hero.state)
+                switch (hero.defaultFighterState)
                 {
                     case FighterState.Front: HeroFrontAmount++; break;
                     case FighterState.Behind: HeroBehindAmount++; break;

@@ -15,6 +15,7 @@ namespace ChessRPGMac
         public static GraphicsDevice graphics { get { return game.GraphicsDevice; } }
         public static ContentManager content { get { return game.Content; } }
         public static Camera camera;
+        public static SoulBox soulBox;
 
         public class Properties
         {

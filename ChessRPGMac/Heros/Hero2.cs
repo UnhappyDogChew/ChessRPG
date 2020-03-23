@@ -6,25 +6,24 @@ namespace ChessRPGMac
 {
     public class Hero2 : Hero
     {
-        public Hero2()
+        public Hero2(FighterState state) : base(state)
         {
             name = "Warrior";
             level = 3;
             soul = 1;
             sprite = Global.spriteBox.Pick("Hero2");
-            HeroClass = Class.Warrior;
-            HeroElement = Element.Earth;
+            heroClass = Class.Warrior;
+            heroElement = Element.Earth;
             maxHp = 700;
-            mana = 10;
-            speed = 40;
+            mana = 50;
+            speed = 50;
             strength = 40;
             intelligence = 15;
             defense = 25;
+            rarity = 3;
 
             attacks = new Skill[] { new MeleeAttack() };
             skills = new Skill[] { new BloodySlash(), new FrozenSlash(), null, null, null };
-
-            Reset();
         }
     }
 
@@ -41,7 +40,7 @@ namespace ChessRPGMac
 
         public override bool IsAvailable(BattleStage stage, FighterObject user)
         {
-            return (user.fighter.HP > hpUsage);
+            return (user.HP > hpUsage);
         }
 
         public override void Execute(BattleStage stage, FighterObject user, List<FighterObject> targetList, ActionFinishHandler handler)

@@ -91,6 +91,8 @@ namespace ChessRPGMac
             Sprites[name] = new Sprite(content.Load<Texture2D>(name), 64, 64, origin, interval: 5, repeate: false);
             origin = new Vector2(32, 40); name = "Frozen";
             Sprites[name] = new Sprite(content.Load<Texture2D>(name), origin);
+            origin = new Vector2(32, 40); name = "Auras";
+            Sprites[name] = new Sprite(content.Load<Texture2D>(name), 64, 64, origin, animating: false);
             #endregion
         }
         /// <summary>

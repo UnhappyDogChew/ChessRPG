@@ -10,8 +10,6 @@ namespace ChessRPGMac
         public HeroObject heroObject { get; private set; }
         Texture2D gageTexture;
 
-        Hero hero { get { return heroObject.hero; } }
-
         int HP;
         float SP;
         float AP;
@@ -33,14 +31,14 @@ namespace ChessRPGMac
 
         public override void Draw(GameTime gameTime, SpriteBatch spriteBatch)
         {
-            if (hero.alive)
+            if (heroObject.alive)
             {
                 spriteBatch.Begin();
                 spriteBatch.Draw(gageTexture, new Vector2(x, y),
                     sourceRectangle: new Rectangle(0, 0, FRAME_WIDTH, FRAME_HEIGHT), color: Color.White);
                 // Draw Gagebars.
                 spriteBatch.Draw(gageTexture, new Vector2(x + GAGEBARSTART_X, y + GAGEBARSTART_Y),
-                    sourceRectangle: new Rectangle(0, FRAME_HEIGHT, (int)(GAGEBAR_WIDTH * ((float)HP / hero.maxHp)), GAGEBAR_HEIGHT),
+                    sourceRectangle: new Rectangle(0, FRAME_HEIGHT, (int)(GAGEBAR_WIDTH * ((float)HP / heroObject.maxHp)), GAGEBAR_HEIGHT),
                     color: Color.White);
                 spriteBatch.Draw(gageTexture, new Vector2(x + GAGEBARSTART_X, y + GAGEBARSTART_Y + (GAGEBAR_HEIGHT + GAGEBAR_GAP)),
                     sourceRectangle: new Rectangle(0, FRAME_HEIGHT + GAGEBAR_HEIGHT, (int)(GAGEBAR_WIDTH * (SP / 100)), GAGEBAR_HEIGHT),
@@ -56,9 +54,9 @@ namespace ChessRPGMac
 
         public override void Update(GameTime gameTime)
         {
-            HP = hero.HP;
-            SP = hero.SP;
-            AP = hero.AP;
+            HP = heroObject.HP;
+            SP = heroObject.SP;
+            AP = heroObject.AP;
             relativeX = heroObject.x - FRAME_WIDTH / 2 - Global.camera.x;
             relativeY = heroObject.y + FIGHTER_GAGE_GAP - Global.camera.y;
         }
@@ -87,17 +85,17 @@ namespace ChessRPGMac
 
         public override void Draw(GameTime gameTime, SpriteBatch spriteBatch)
         {
-            if (enemy.alive)
+            if (enemyObject.alive)
             {
                 spriteBatch.Begin();
                 spriteBatch.Draw(gageTexture, new Vector2(x, y),
                     sourceRectangle: new Rectangle(0, 0, FRAME_WIDTH, FRAME_HEIGHT), color: Color.White);
                 // Draw Gagebars.
                 spriteBatch.Draw(gageTexture, new Vector2(x + GAGEBARSTART_X, y + GAGEBARSTART_Y),
-                    sourceRectangle: new Rectangle(0, FRAME_HEIGHT, (int)(GAGEBAR_WIDTH * ((float)enemy.HP / enemy.maxHp)), GAGEBAR_HEIGHT),
+                    sourceRectangle: new Rectangle(0, FRAME_HEIGHT, (int)(GAGEBAR_WIDTH * ((float)enemyObject.HP / enemy.maxHp)), GAGEBAR_HEIGHT),
                     color: Color.White);
                 spriteBatch.Draw(gageTexture, new Vector2(x + GAGEBARSTART_X, y + GAGEBARSTART_Y + (GAGEBAR_HEIGHT + GAGEBAR_GAP)),
-                    sourceRectangle: new Rectangle(0, FRAME_HEIGHT + GAGEBAR_GAP * 2, (int)(GAGEBAR_WIDTH * (enemy.AP / 100)), GAGEBAR_HEIGHT),
+                    sourceRectangle: new Rectangle(0, FRAME_HEIGHT + GAGEBAR_GAP * 2, (int)(GAGEBAR_WIDTH * (enemyObject.AP / 100)), GAGEBAR_HEIGHT),
                     color: Color.White);
                 spriteBatch.End();
             }

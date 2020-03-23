@@ -6,14 +6,14 @@ namespace ChessRPGMac
 {
     public class Hero1 : Hero
     {
-        public Hero1()
+        public Hero1(FighterState state) : base(state)
         {
             name = "Healer";
             level = 4;
             soul = 2;
             sprite = Global.spriteBox.Pick("Hero1");
-            HeroClass = Class.Priest;
-            HeroElement = Element.Light;
+            heroClass = Class.Priest;
+            heroElement = Element.Light;
             maxHp = 300;
             mana = 10;
             speed = 50;
@@ -22,8 +22,7 @@ namespace ChessRPGMac
             defense = 5;
             attacks = new Skill[] { new RangeAttack() };
             skills = new Skill[] { new Heal(), new SuperHeal(), null, null, null };
-
-            Reset();
+            rarity = 2;
         }
     }
 
@@ -41,7 +40,7 @@ namespace ChessRPGMac
 
         public override void Execute(BattleStage stage, FighterObject user, List<FighterObject> targetList, ActionFinishHandler handler)
         {
-            targetList[0].fighter.RestoreHP(((Hero)user.fighter).intelligence * 2);
+            targetList[0].RestoreHP(((Hero)user.fighter).intelligence * 2);
             handler(null);
             base.Execute(stage, user, targetList, handler);
         }
@@ -67,7 +66,7 @@ namespace ChessRPGMac
         {
             foreach (FighterObject target in targetList)
             {
-                target.fighter.RestoreHP(((Hero)user.fighter).intelligence * 2);
+                target.RestoreHP(((Hero)user.fighter).intelligence * 2);
             }
             handler(null);
             base.Execute(stage, user, targetList, handler);

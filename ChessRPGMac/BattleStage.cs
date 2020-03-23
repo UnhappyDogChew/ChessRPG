@@ -38,17 +38,17 @@ namespace ChessRPGMac
             if (fighterObject is EnemyObject ||
                 (fighterObject is NullFighterObject && ((NullFighterObject)fighterObject).type == FighterType.Enemy))
             {
-                if (fighterObject.fighter.state == FighterState.Behind)
+                if (fighterObject.state == FighterState.Behind)
                     index = 0;
-                else if (fighterObject.fighter.state == FighterState.Front)
+                else if (fighterObject.state == FighterState.Front)
                     index = 1;
             }
             else if (fighterObject is HeroObject ||
                 (fighterObject is NullFighterObject && ((NullFighterObject)fighterObject).type == FighterType.Hero))
             {
-                if (fighterObject.fighter.state == FighterState.Front)
+                if (fighterObject.state == FighterState.Front)
                     index = 2;
-                else if (fighterObject.fighter.state == FighterState.Behind)
+                else if (fighterObject.state == FighterState.Behind)
                     index = 3;
             }
             else
@@ -76,17 +76,17 @@ namespace ChessRPGMac
             if (fighterObject is EnemyObject ||
                 (fighterObject is NullFighterObject && ((NullFighterObject)fighterObject).type == FighterType.Enemy))
             {
-                if (fighterObject.fighter.state == FighterState.Behind)
+                if (fighterObject.state == FighterState.Behind)
                     index = 0;
-                else if (fighterObject.fighter.state == FighterState.Front)
+                else if (fighterObject.state == FighterState.Front)
                     index = 1;
             }
             else if (fighterObject is HeroObject ||
                 (fighterObject is NullFighterObject && ((NullFighterObject)fighterObject).type == FighterType.Hero))
             {
-                if (fighterObject.fighter.state == FighterState.Front)
+                if (fighterObject.state == FighterState.Front)
                     index = 2;
-                else if (fighterObject.fighter.state == FighterState.Behind)
+                else if (fighterObject.state == FighterState.Behind)
                     index = 3;
             }
             else
@@ -125,16 +125,16 @@ namespace ChessRPGMac
             fighterLists[int.Parse(fl2[0].ToString())].Insert(int.Parse(fl2[1].ToString()), fighterObject1);
 
             // Change state
-            FighterState tempState = fighterObject1.fighter.state;
+            FighterState tempState = fighterObject1.state;
 
-            fighterObject1.fighter.ChangeState(fighterObject2.fighter.state);
-            fighterObject2.fighter.ChangeState(tempState);
+            fighterObject1.ChangeState(fighterObject2.state);
+            fighterObject2.ChangeState(tempState);
         }
 
         public bool MoveLocation(FighterObject fighterObject, FighterState state)
         {
             RemoveFighterObject(fighterObject);
-            fighterObject.fighter.ChangeState(state);
+            fighterObject.ChangeState(state);
             return AddFighterObject(fighterObject);
         }
 
@@ -149,17 +149,17 @@ namespace ChessRPGMac
             if (fighterObject is EnemyObject ||
                 (fighterObject is NullFighterObject && ((NullFighterObject)fighterObject).type == FighterType.Enemy))
             {
-                if (fighterObject.fighter.state == FighterState.Behind)
+                if (fighterObject.state == FighterState.Behind)
                     index = 0;
-                else if (fighterObject.fighter.state == FighterState.Front)
+                else if (fighterObject.state == FighterState.Front)
                     index = 1;
             }
             else if (fighterObject is HeroObject ||
                 (fighterObject is NullFighterObject && ((NullFighterObject)fighterObject).type == FighterType.Hero))
             {
-                if (fighterObject.fighter.state == FighterState.Front)
+                if (fighterObject.state == FighterState.Front)
                     index = 2;
-                else if (fighterObject.fighter.state == FighterState.Behind)
+                else if (fighterObject.state == FighterState.Behind)
                     index = 3;
             }
             else

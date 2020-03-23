@@ -42,8 +42,8 @@ namespace ChessRPGMac
             levels[3] = Global.content.Load<Texture2D>("HeroLevel4");
             levels[4] = Global.content.Load<Texture2D>("HeroLevel5");
             font = Global.content.Load<SpriteFont>("neodgm12");
-            components.Add(new ClassIcon(hero.HeroClass.ToString(), this, CLASSSTART_X, CLASSSTART_Y, hero.HeroClass));
-            components.Add(new ElementIcon(hero.HeroElement.ToString(), this, CLASSSTART_X, CLASSSTART_Y + CLASSGAP, hero.HeroElement));
+            components.Add(new ClassIcon(hero.heroClass.ToString(), this, CLASSSTART_X, CLASSSTART_Y, hero.heroClass));
+            components.Add(new ElementIcon(hero.heroElement.ToString(), this, CLASSSTART_X, CLASSSTART_Y + CLASSGAP, hero.heroElement));
 
         }
 
@@ -110,15 +110,15 @@ namespace ChessRPGMac
 
             switch (((DragSocket)parent).name)
             {
-                case "HeroFront": hero.ChangeState(FighterState.Front); break;
-                case "HeroBehind": hero.ChangeState(FighterState.Behind); break;
-                case "HeroStored": hero.ChangeState(FighterState.Stored); break;
+                case "HeroFront": hero.ChangeDefaultState(FighterState.Front); break;
+                case "HeroBehind": hero.ChangeDefaultState(FighterState.Behind); break;
+                case "HeroStored": hero.ChangeDefaultState(FighterState.Stored); break;
             }
         }
 
         public string GetKey()
         {
-            switch (hero.state)
+            switch (hero.defaultFighterState)
             {
                 case FighterState.Front: return "HeroFront";
                 case FighterState.Behind: return "HeroBehind";

@@ -13,12 +13,12 @@ namespace ChessRPGMac
 
         public override bool IsAvailable(BattleStage stage, FighterObject user)
         {
-            return ((Hero)user.fighter).SP >= manaUsage;
+            return ((HeroObject)user).SP >= manaUsage;
         }
 
         public override void Execute(BattleStage stage, FighterObject user, List<FighterObject> targetList, ActionFinishHandler handler)
         {
-            ((Hero)user.fighter).DecreaseSP(manaUsage);
+            ((HeroObject)user).DecreaseSP(manaUsage);
         }
 
         public abstract string GetDescription();
@@ -40,7 +40,7 @@ namespace ChessRPGMac
 
         public override bool IsAvailable(BattleStage stage, FighterObject user)
         {
-            return user.fighter.state == FighterState.Front;
+            return user.state == FighterState.Front;
         }
 
         public override void Execute(BattleStage stage, FighterObject user, List<FighterObject> targetList, ActionFinishHandler handler)
@@ -109,7 +109,7 @@ namespace ChessRPGMac
 
         public override bool IsAvailable(BattleStage stage, FighterObject user)
         {
-            if (user.fighter.state == FighterState.Front)
+            if (user.state == FighterState.Front)
                 return (stage.fighterLists[3].Count < 5 && (stage.fighterLists[2].Count > 1 || 
                     (stage.fighterLists[2].Count == 1 && stage.fighterLists[3].Count > 0)));
             else

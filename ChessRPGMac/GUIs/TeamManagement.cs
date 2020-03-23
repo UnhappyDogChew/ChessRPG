@@ -215,11 +215,11 @@ namespace ChessRPGMac
                     if (summary.hero == hero) // If herosummary is exist, move it on right place.
                     {
                         exist = true;
-                        if (summary.parent.name != "Hero" + hero.state.ToString())
+                        if (summary.parent.name != "Hero" + hero.defaultFighterState.ToString())
                         {
-                            ChangeSummaryGroup(summary, hero.state);
+                            ChangeSummaryGroup(summary, hero.defaultFighterState);
                         }
-                        switch (hero.state)
+                        switch (hero.defaultFighterState)
                         {
                             case FighterState.Front: frontCount++; break;
                             case FighterState.Behind: behindCount++; break;
@@ -230,7 +230,7 @@ namespace ChessRPGMac
                 }
                 if (!exist) // If doesn't exist, Create one.
                 {
-                    switch (hero.state)
+                    switch (hero.defaultFighterState)
                     {
                         case FighterState.Front: 
                             frontGroup.SetContent(frontCount, 

@@ -77,44 +77,13 @@ namespace ChessRPGMac
 
     public class Combat
     {
-        public List<Enemy> enemyList { get; private set; }
-        public int frontCount { get; private set; }
-        public int behindCount { get; private set; }
+        public List<Enemy> enemyFrontList { get; private set; }
+        public List<Enemy> enemyBehindList { get; private set; }
 
-        public Combat(List<Enemy> enemyList)
+        public Combat(List<Enemy> enemyFrontList, List<Enemy> enemyBehindList)
         {
-            this.enemyList = enemyList;
-            frontCount = 0;
-            behindCount = 0;
-            foreach (Enemy enemy in enemyList)
-            {
-                if (enemy.state == FighterState.Front)
-                    frontCount++;
-                else if (enemy.state == FighterState.Behind)
-                    behindCount++;
-            }
-        }
-
-        public int GetEnemyFrontCount()
-        {
-            int result = 0;
-            foreach (Enemy enemy in enemyList)
-            {
-                if (enemy.state == FighterState.Front && enemy.alive)
-                    result++;
-            }
-            return result;
-        }
-
-        public int GetEnemyBehindCount()
-        {
-            int result = 0;
-            foreach (Enemy enemy in enemyList)
-            {
-                if (enemy.state == FighterState.Behind && enemy.alive)
-                    result++;
-            }
-            return result;
+            this.enemyFrontList = enemyFrontList;
+            this.enemyBehindList = enemyBehindList;
         }
     }
 }

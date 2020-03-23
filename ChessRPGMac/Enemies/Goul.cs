@@ -5,25 +5,24 @@ namespace ChessRPGMac
 {
     public class Goul : Enemy
     {
-        public Goul(FighterState state) : base(state)
+        public Goul()
         {
             name = "Goul";
             strength = 120;
             defense = 5;
             intelligence = 1;
             maxHp = 500;
-            speed = 40;
+            speed = 49;
             sprite = Global.spriteBox.Pick("Goul");
-
-            Reset();
         }
 
-        public override void PhaseCheck(BattleStage stage)
+        public override int PhaseCheck(BattleStage stage)
         {
             // No phase transition.
+            return -1;
         }
 
-        protected override void CreatePattern()
+        public override void CreatePattern(Queue<EnemySkill> pattern)
         {
             pattern.Enqueue(new Scratch());
         }

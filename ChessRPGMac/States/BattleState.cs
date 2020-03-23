@@ -71,16 +71,22 @@ namespace ChessRPGMac
                 timespan++;
                 if (timespan > TRANSFORMING_TIME)
                 {
-                    #region Summon Enemy and Fighter objects.
-                    foreach (Enemy enemy in combat.enemyList)
+                    #region Summon Enemy and Hero objects.
+                    foreach (Enemy enemy in combat.enemyFrontList)
                     {
-                        EnemyObject enemyObject = new EnemyObject(0, 0, enemy);
+                        EnemyObject enemyObject = new EnemyObject(0, 0, enemy, FighterState.Front, Global.soulBox.GetRandomHeros(1, enemy.soulCount));
+                        guiLayer.AddGUI(new EnemyGages(enemy.name + "Gages", null, enemyObject));
+                        stage.AddFighterObject(enemyObject);
+                    }
+                    foreach (Enemy enemy in combat.enemyBehindList)
+                    {
+                        EnemyObject enemyObject = new EnemyObject(0, 0, enemy, FighterState.Behind, Global.soulBox.GetRandomHeros(1, enemy.soulCount));
                         guiLayer.AddGUI(new EnemyGages(enemy.name + "Gages", null, enemyObject));
                         stage.AddFighterObject(enemyObject);
                     }
                     foreach (Hero hero in player.heros)
                     {
-                        if (hero.state == FighterState.Stored)
+                        if (hero.defaultFighterState == FighterState.Stored)
                             continue;
                         HeroObject heroObject = new HeroObject(0, 0, hero);
                         guiLayer.AddGUI(new HeroGages(hero.name + "Gages", null, heroObject));
@@ -126,6 +132,19 @@ namespace ChessRPGMac
                 }
                 else
                 {
+                    // Buff trigger check.
+                    foreach (FighterObject fighterObject in stage)
+                    {
+                        foreach (Buff buff in fighterObject.buffList)
+                        {
+                            string method = buff.TriggerCheck();
+                            if (method != "")
+                            {
+                                readiedBuff.Enqueue(new BuffAction(buff, method));
+                            }
+                        }
+                    }
+
                     if (readiedBuff.Count > 0)
                     {
                         timePaused = true;
@@ -146,7 +165,7 @@ namespace ChessRPGMac
                         timePaused = true;
                         actingFighterObject = readiedFighterObjects.Dequeue();
                         // Check if fighter is paused.
-                        while (actingFighterObject.fighter.paused)
+                        while (actingFighterObject.paused)
                         {
                             actingFighterObject = readiedFighterObjects.Dequeue();
                         }
@@ -156,31 +175,24 @@ namespace ChessRPGMac
                             ActionMenuEnable((HeroObject)actingFighterObject);
                         }
 
-                        if (actingFighterObject.fighter is Enemy)
+                        if (actingFighterObject is EnemyObject)
                         {
-                            EnemySkill enemySkill = ((Enemy)actingFighterObject.fighter).GetAction();
+                            EnemySkill enemySkill = ((EnemyObject)actingFighterObject).GetAction();
                             enemySkill.Execute(stage, actingFighterObject, enemySkill.SelectTarget(stage), SummonFighterObject);
                         }
                     }
-                    else
+                    else // Time goes here.
                     {
                         foreach (FighterObject fighterObject in stage)
                         {
                             if (fighterObject == null)
                                 continue;
 
-                            if (fighterObject.fighter.IncreaseGage(60))
+                            if (fighterObject.IncreaseGage(60))
                                 readiedFighterObjects.Enqueue(fighterObject);
 
                             foreach (Buff buff in fighterObject.buffList)
-                            {
                                 buff.Update(gameTime);
-                                string method = buff.TriggerCheck();
-                                if (method != "")
-                                {
-                                    readiedBuff.Enqueue(new BuffAction(buff, method));
-                                }
-                            }
                         }
                     }
                 }
@@ -191,7 +203,8 @@ namespace ChessRPGMac
 
         private void RestartTime()
         {
-            actingFighterObject.fighter.ResetAP();
+            actingFighterObject?.ResetAP();
+            actingFighterObject = null;
             timePaused = false;
         }
 
@@ -220,7 +233,7 @@ namespace ChessRPGMac
             {
                 for (int col = 0; col < stage.fighterLists[row].Count; col++)
                 {
-                    if (!stage.fighterLists[row][col].fighter.alive)
+                    if (!stage.fighterLists[row][col].alive)
                     {
                         stage.fighterLists[row][col].Kill();
                         stage.RemoveFighterObject(stage.fighterLists[row][col]);
@@ -259,7 +272,7 @@ namespace ChessRPGMac
             #region MoveAction NullFighterObject creation
             if (action is MoveAction)
             {
-                if (actingFighterObject.fighter.state == FighterState.Behind)
+                if (actingFighterObject.state == FighterState.Behind)
                 {
                     // Front
                     int heroFrontCount = stage.fighterLists[(int)StageRow.HeroFront].Count;
@@ -277,7 +290,7 @@ namespace ChessRPGMac
                         stage.AddFighterObject(nullFighterObject);
                     }
                 }
-                else if (actingFighterObject.fighter.state == FighterState.Front && stage.fighterLists[2].Count > 1)
+                else if (actingFighterObject.state == FighterState.Front && stage.fighterLists[2].Count > 1)
                 {
                     // Behind
                     int heroBehindCount = stage.fighterLists[(int)StageRow.HeroBehind].Count;
@@ -299,7 +312,7 @@ namespace ChessRPGMac
             #endregion
 
             string targetString = action.targetType.ToString().Substring(3);
-            FighterState actingFighterState = actingFighterObject.fighter.state;
+            FighterState actingFighterState = actingFighterObject.state;
             switch (targetString)
             {
                 case "Enemy": selector.constraint = (int row, int col) => (row == 0 || row == 1); break;
@@ -368,71 +381,6 @@ namespace ChessRPGMac
         }
         #endregion
 
-        /// <summary>
-        /// Check Combat's Enemy list and summon them in the <see cref=" BattleStage"/>.
-        /// </summary>
-        private void SummonEnemies()
-        {
-            int frontStartX = (Global.camera.width - (combat.frontCount - 1) * ENEMY_GAP_X) / 2;
-            int behindStartX = (Global.camera.width - (combat.behindCount - 1) * ENEMY_GAP_X) / 2;
-            int enemyFrontCount = 0;
-            int enemyBehindCount = 0;
-            foreach (Enemy enemy in combat.enemyList)
-            {
-                EnemyObject fighterObject;
-                if (enemy.state == FighterState.Front)
-                {
-                    fighterObject =
-                        new EnemyObject(Global.camera.x + frontStartX + ENEMY_GAP_X * enemyFrontCount,
-                            Global.camera.y + ENEMYFRONT_Y, enemy);
-                    guiLayer.AddGUI(new EnemyGages(fighterObject.fighter.name + "Gage", null, fighterObject));
-                    stage.AddFighterObject(fighterObject);
-                    enemyFrontCount++;
-                }
-                else if (enemy.state == FighterState.Behind)
-                {
-                    fighterObject =
-                        new EnemyObject(Global.camera.x + behindStartX + ENEMY_GAP_X * enemyBehindCount,
-                            Global.camera.y + ENEMYFRONT_Y + ENEMY_GAP_Y, enemy);
-                    guiLayer.AddGUI(new EnemyGages(fighterObject.fighter.name + "Gage", null, fighterObject));
-                    stage.AddFighterObject(fighterObject);
-                    enemyBehindCount++;
-                }
-            }
-        }
-        /// <summary>
-        /// Check Player's hero list and summon them in the <see cref=" BattleStage"/>.
-        /// </summary>
-        private void SummonHeros()
-        {
-            int frontStartX = (Global.camera.width - (player.HeroFrontAmount - 1) * HERO_GAP_X) / 2;
-            int behindStartX = (Global.camera.width - (player.HeroBehindAmount - 1) * HERO_GAP_X) / 2;
-            int heroFrontCount = 0;
-            int heroBehindCount = 0;
-            foreach (Hero hero in player.heros)
-            {
-                HeroObject fighterObject;
-                if (hero.state == FighterState.Front)
-                {
-                    fighterObject =
-                        new HeroObject(Global.camera.x + frontStartX + ENEMY_GAP_X * heroFrontCount,
-                            Global.camera.y + HEROFRONT_Y, hero);
-                    guiLayer.AddGUI(new HeroGages(fighterObject.fighter.name + "Gage", null, fighterObject));
-                    stage.AddFighterObject(fighterObject);
-                    heroFrontCount++;
-                }
-                else if (hero.state == FighterState.Behind)
-                {
-                    fighterObject =
-                        new HeroObject(Global.camera.x + behindStartX + HERO_GAP_X * heroBehindCount,
-                            Global.camera.y + HEROBEHIND_Y, hero);
-                    guiLayer.AddGUI(new HeroGages(fighterObject.fighter.name + "Gage", null, fighterObject));
-                    stage.AddFighterObject(fighterObject);
-                    heroBehindCount++;
-                }
-            }
-        }
-
         private bool SetFighterObjects()
         {
             int enemyFrontStartX = (Global.camera.width - (stage.fighterLists[1].Count - 1) * ENEMY_GAP_X) / 2;
@@ -451,7 +399,7 @@ namespace ChessRPGMac
                 if (fighterObject is EnemyObject || 
                     (fighterObject is NullFighterObject && ((NullFighterObject)fighterObject).type == FighterType.Enemy))
                 {
-                    if (fighterObject.fighter.state == FighterState.Behind)
+                    if (fighterObject.state == FighterState.Behind)
                     {
                         if (fighterObject.MoveLocation(new Point(Global.camera.x + enemyBehindStartX + ENEMY_GAP_X * enemyBehindCount,
                             Global.camera.y + ENEMYFRONT_Y + ENEMY_GAP_Y)))
@@ -468,7 +416,7 @@ namespace ChessRPGMac
                 }
                 else // Set HeroObjects.
                 {
-                    if (fighterObject.fighter.state == FighterState.Front)
+                    if (fighterObject.state == FighterState.Front)
                     {
                         if (fighterObject.MoveLocation(new Point(Global.camera.x + heroFrontStartX + HERO_GAP_X * heroFrontCount,
                             Global.camera.y + HEROFRONT_Y)))
@@ -498,35 +446,26 @@ namespace ChessRPGMac
             {
                 if (fighterObject == null)
                     continue;
-                if (fighterObject is EnemyObject && fighterObject.fighter.state == FighterState.Behind)
+                if (fighterObject is EnemyObject && fighterObject.state == FighterState.Behind)
                 {
                     selector.SetItemToMatrix("FighterGroup", fighterObject, 0, enemyBehindCount);
                     enemyBehindCount++;
                 }
-                else if (fighterObject is EnemyObject && fighterObject.fighter.state == FighterState.Front)
+                else if (fighterObject is EnemyObject && fighterObject.state == FighterState.Front)
                 {
                     selector.SetItemToMatrix("FighterGroup", fighterObject, 1, enemyFrontCount);
                     enemyBehindCount++;
                 }
-                else if (fighterObject is HeroObject && fighterObject.fighter.state == FighterState.Front)
+                else if (fighterObject is HeroObject && fighterObject.state == FighterState.Front)
                 {
                     selector.SetItemToMatrix("FighterGroup", fighterObject, 2, heroFrontCount);
                     heroFrontCount++;
                 }
-                else if (fighterObject is HeroObject && fighterObject.fighter.state == FighterState.Behind)
+                else if (fighterObject is HeroObject && fighterObject.state == FighterState.Behind)
                 {
                     selector.SetItemToMatrix("FighterGroup", fighterObject, 3, heroBehindCount);
                     heroBehindCount++;
                 }
-            }
-        }
-
-        private void UpdateBattleStage()
-        {
-            List<FighterObject> fighterObjects = new List<FighterObject>();
-            foreach (FighterObject fighterObject in stage)
-            {
-                fighterObjects.Add(fighterObject);
             }
         }
 
