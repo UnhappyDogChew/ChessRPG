@@ -67,11 +67,9 @@ namespace ChessRPGMac
             }
             spriteBatch.Draw(levels[hero.level - 1], new Vector2(LEVELSTART_X, LEVELSTART_Y), Color.White);
             spriteBatch.DrawString(font, hero.name, new Vector2(2, 2), Toolbox.ParseColor("#5e3643ff"));
-            foreach (GUIComponent component in components)
-            {
-                component.DrawBegin(gameTime, spriteBatch);
-            }
             spriteBatch.End();
+
+            base.DrawBegin(gameTime, spriteBatch);
 
             Global.graphics.SetRenderTarget(null);
         }

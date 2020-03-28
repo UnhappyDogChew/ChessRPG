@@ -17,12 +17,15 @@ namespace ChessRPGMac
         public static Camera camera;
         public static SoulBox soulBox;
 
-        public class Properties
+        public static class Properties
         {
             public static readonly int GAME_WIDTH = 512;
             public static readonly int GAME_HEIGHT = 704;
             public static readonly int FIGHTER_IN_ROW = 5;
             public static readonly int FRAME_PER_SECOND = 60;
+
+            public static readonly int[] SOUL_MAGNIFICATION = { 1, 2, 3, 3, 4, 4, 5, 5, 5, 5 };
+            public static readonly int[] SOUL_AMOUNT = { 10, 8, 5, 3, 1 };
 
             public static bool fastMode = false;
         }

@@ -46,5 +46,7 @@ namespace ChessRPGMac
         {
             this.defaultFighterState = state;
         }
+
+        public abstract string GetDescription();
     }
 }

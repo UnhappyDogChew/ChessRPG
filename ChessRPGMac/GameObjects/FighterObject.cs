@@ -9,8 +9,6 @@ namespace ChessRPGMac
     {
         public Fighter fighter { get; protected set; }
         public List<Buff> buffList;
-        public delegate void AnimationFinishHandler();
-        public AnimationFinishHandler animationFinishHandler;
 
         public int HP { get; protected set; }
         public float AP { get; protected set; }
@@ -64,28 +62,6 @@ namespace ChessRPGMac
         {
             fighter.sprite.Update(gameTime);
 
-            if (moving)
-            {
-                float xMovement = (movePoint.x - x) / 2.0f;
-                float yMovement = (movePoint.y - y) / 2.0f;
-                if (xMovement > 0 && xMovement < 1)
-                    xMovement = 1;
-                else if (xMovement < 0 && xMovement > -1)
-                    xMovement = -1;
-                if (yMovement > 0 && yMovement < 1)
-                    yMovement = 1;
-                else if (yMovement < 0 && yMovement > -1)
-                    yMovement = -1;
-
-                x += (int)xMovement;
-                y += (int)yMovement;
-
-                if (x == movePoint.x && y == movePoint.y)
-                {
-                    moving = false;
-                    animationFinishHandler?.Invoke();
-                }
-            }
             if (summoning)
             {
                 summoning = false;
@@ -100,6 +76,8 @@ namespace ChessRPGMac
                     i--;
                 }
             }
+
+            base.Update(gameTime);
         }
 
         public void AddBuff(Buff buff, int duration, int interval = 0)
@@ -203,7 +181,7 @@ namespace ChessRPGMac
         /// </summary>
         /// <returns><c>true</c>, if location was moved, <c>false</c> otherwise.</returns>
         /// <param name="location">Location.</param>
-        public bool MoveLocation(Point location)
+        public override bool MoveLocationSmooth(Point location, float step)
         {
             if (summoning)
             {
@@ -211,11 +189,7 @@ namespace ChessRPGMac
                 y = location.y;
                 return false;
             }
-            if (location.x == x && location.y == y)
-                return false;
-            moving = true;
-            movePoint = location;
-            return true;
+            return base.MoveLocationSmooth(location, step);
         }
 
         public void SetSpriteAnimation(SpriteAnimation animation)
@@ -223,10 +197,14 @@ namespace ChessRPGMac
             fighter.sprite.animation = animation;
         }
 
-        public void Kill()
+        public void Die()
         {
             // Dying animation should be implemented here.
             Finish();
+            foreach (Buff buff in buffList)
+            {
+                buff.TriggerFinish();
+            }
         }
 
         public void Focus()
@@ -287,6 +265,11 @@ namespace ChessRPGMac
             if (SP < 0)
                 SP = 0;
         }
+
+        public void Victory()
+        {
+            Finish();
+        }
     }
 
     public class EnemyObject : FighterObject
@@ -330,6 +313,11 @@ namespace ChessRPGMac
             if (p == -1)
                 return;
             phase = p;
+        }
+
+        public void Victory()
+        {
+            Finish();
         }
     }
 

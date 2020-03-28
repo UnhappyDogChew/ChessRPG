@@ -24,6 +24,11 @@ namespace ChessRPGMac
             skills = new Skill[] { new Heal(), new SuperHeal(), null, null, null };
             rarity = 2;
         }
+
+        public override string GetDescription()
+        {
+            return "This is Healer!";
+        }
     }
 
     public class Heal : Skill

@@ -11,9 +11,10 @@ namespace ChessRPGMac
             strength = 120;
             defense = 5;
             intelligence = 1;
-            maxHp = 500;
+            maxHp = 50;
             speed = 49;
             sprite = Global.spriteBox.Pick("Goul");
+            soulCount = 3;
         }
 
         public override int PhaseCheck(BattleStage stage)

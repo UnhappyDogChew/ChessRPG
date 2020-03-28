@@ -154,6 +154,15 @@ namespace ChessRPGMac
             return false;
         }
 
+        public static bool IsPointInsideSquare(Point p, Rectangle boundary)
+        {
+            if ((p.x >= boundary.X) && (p.x <= boundary.X + boundary.Width) && (p.y >= boundary.Y) && (p.y <= boundary.Y + boundary.Height))
+            {
+                return true;
+            }
+            return false;
+        }
+
         public static Color ParseColor(string data)
         {
             if (data[0] == '#')

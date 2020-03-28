@@ -32,6 +32,7 @@ namespace ChessRPGMac
         bool attack_triggered;
         bool hit_triggered;
         bool ready_triggered;
+        bool finish_triggered;
 
         // Extra datas.
         List<FighterObject> targetList;
@@ -98,7 +99,7 @@ namespace ChessRPGMac
             }
 
             duration_timespan++;
-            if (duration_timespan >= duration)
+            if (duration_timespan >= duration && finish_triggered)
             {
                 return "Finish";
             }
@@ -120,6 +121,11 @@ namespace ChessRPGMac
         public void TriggerReady()
         {
             ready_triggered = true;
+        }
+
+        public void TriggerFinish()
+        {
+            finish_triggered = true;
         }
 
         public virtual void Start(ActionFinishHandler handler) { }

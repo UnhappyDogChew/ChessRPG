@@ -18,12 +18,16 @@ namespace ChessRPGMac
 
         public override void DrawBegin(GameTime gameTime, SpriteBatch spriteBatch)
         {
+            spriteBatch.Begin();
             spriteBatch.Draw(iconTexture, new Vector2(relativeX, relativeY), Color.White);
+            spriteBatch.End();
         }
 
         public override void Draw(GameTime gameTime, SpriteBatch spriteBatch)
         {
+            spriteBatch.Begin();
             spriteBatch.Draw(iconTexture, new Vector2(x, y), Color.White);
+            spriteBatch.End();
         }
 
         public void InvokeTooltip()
@@ -49,12 +53,16 @@ namespace ChessRPGMac
 
         public override void DrawBegin(GameTime gameTime, SpriteBatch spriteBatch)
         {
+            spriteBatch.Begin();
             spriteBatch.Draw(iconTexture, new Vector2(relativeX, relativeY), Color.White);
+            spriteBatch.End();
         }
 
         public override void Draw(GameTime gameTime, SpriteBatch spriteBatch)
         {
+            spriteBatch.Begin();
             spriteBatch.Draw(iconTexture, new Vector2(x, y), Color.White);
+            spriteBatch.End();
         }
 
         public void InvokeTooltip()

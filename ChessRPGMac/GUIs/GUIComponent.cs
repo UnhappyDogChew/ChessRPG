@@ -47,7 +47,7 @@ namespace ChessRPGMac
             this.parent = newParent;
         }
 
-        public void Finish() { Finished = true; }
+        public virtual void Finish() { Finished = true; }
 
         public void Activate() { Activated = true; }
 
@@ -168,6 +168,15 @@ namespace ChessRPGMac
 
                 index++;
             }
+        }
+
+        public override void Finish()
+        {
+            foreach (GUIComponent component in components)
+            {
+                component.Finish();
+            }
+            base.Finish();
         }
     }
 

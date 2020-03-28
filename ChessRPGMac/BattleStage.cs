@@ -171,6 +171,16 @@ namespace ChessRPGMac
             throw new FighterObjectNotFoundException();
         }
 
+        public bool IsEnemyDefeated()
+        {
+            return fighterLists[0].Count == 0 && fighterLists[1].Count == 0;
+        }
+
+        public bool IsHeroDefeated()
+        {
+            return fighterLists[2].Count == 0 && fighterLists[3].Count == 0;
+        }
+
         public IEnumerator GetEnumerator()
         {
             for (int i = 0; i < 4; i++)

@@ -20,10 +20,15 @@ namespace ChessRPGMac
             strength = 40;
             intelligence = 15;
             defense = 25;
-            rarity = 3;
+            rarity = 1;
 
             attacks = new Skill[] { new MeleeAttack() };
             skills = new Skill[] { new BloodySlash(), new FrozenSlash(), null, null, null };
+        }
+
+        public override string GetDescription()
+        {
+            return "This is super strong hero.";
         }
     }
 

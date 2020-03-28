@@ -35,6 +35,7 @@ namespace ChessRPGMac
         List<FighterObject> targetBuffer;
         Queue<FighterObject> readiedFighterObjects;
         Queue<BuffAction> readiedBuff;
+        List<EnemyObject> deadEnemyObjects;
 
         SoundEffect menuSelect_soundEffect;
 
@@ -208,6 +209,10 @@ namespace ChessRPGMac
             timePaused = false;
         }
 
+        #region Chain Methods after action execution.
+
+        // Order : SummonFighterObject -> RemoveDeadFighters -> CheckBattleFinished -> UpdateFigherObjectLocations
+
         private void UpdateFighterObjectLocations()
         {
             selectedEffect?.Finish();
@@ -227,6 +232,22 @@ namespace ChessRPGMac
             RestartTime();
         }
 
+        private void CheckBattleFinished()
+        {
+            if (stage.IsEnemyDefeated())
+            {
+                ChangeState(new SoulPurifyState(deadEnemyObjects, pressedKeys));
+            }
+            else if (stage.IsHeroDefeated())
+            {
+
+            }
+            else
+            {
+                UpdateFighterObjectLocations();
+            }
+        }
+
         private void RemoveDeadFighters()
         {
             for (int row = 0; row < 4; row++)
@@ -235,13 +256,16 @@ namespace ChessRPGMac
                 {
                     if (!stage.fighterLists[row][col].alive)
                     {
-                        stage.fighterLists[row][col].Kill();
+                        stage.fighterLists[row][col].Die();
+                        if (stage.fighterLists[row][col] is EnemyObject)
+                            deadEnemyObjects.Add((EnemyObject)stage.fighterLists[row][col]);
+
                         stage.RemoveFighterObject(stage.fighterLists[row][col]);
                     }
                 }
             }
             RemoveNullFighterObjects();
-            UpdateFighterObjectLocations();
+            CheckBattleFinished();
         }
 
         private void SummonFighterObject(FighterObject summon)
@@ -250,6 +274,7 @@ namespace ChessRPGMac
                 stage.AddFighterObject(summon);
             RemoveDeadFighters();
         }
+        #endregion
 
         public void AddTargetBuffer(FighterObject target)
         {
@@ -401,15 +426,15 @@ namespace ChessRPGMac
                 {
                     if (fighterObject.state == FighterState.Behind)
                     {
-                        if (fighterObject.MoveLocation(new Point(Global.camera.x + enemyBehindStartX + ENEMY_GAP_X * enemyBehindCount,
-                            Global.camera.y + ENEMYFRONT_Y + ENEMY_GAP_Y)))
+                        if (fighterObject.MoveLocationSmooth(new Point(Global.camera.x + enemyBehindStartX + ENEMY_GAP_X * enemyBehindCount,
+                            Global.camera.y + ENEMYFRONT_Y + ENEMY_GAP_Y), 2.0f))
                             isMoved = true;
                         enemyBehindCount++;
                     }
                     else
                     {
-                        if (fighterObject.MoveLocation(new Point(Global.camera.x + enemyFrontStartX + ENEMY_GAP_X * enemyFrontCount,
-                            Global.camera.y + ENEMYFRONT_Y)))
+                        if (fighterObject.MoveLocationSmooth(new Point(Global.camera.x + enemyFrontStartX + ENEMY_GAP_X * enemyFrontCount,
+                            Global.camera.y + ENEMYFRONT_Y), 2.0f))
                             isMoved = true;
                         enemyFrontCount++;
                     }
@@ -418,15 +443,15 @@ namespace ChessRPGMac
                 {
                     if (fighterObject.state == FighterState.Front)
                     {
-                        if (fighterObject.MoveLocation(new Point(Global.camera.x + heroFrontStartX + HERO_GAP_X * heroFrontCount,
-                            Global.camera.y + HEROFRONT_Y)))
+                        if (fighterObject.MoveLocationSmooth(new Point(Global.camera.x + heroFrontStartX + HERO_GAP_X * heroFrontCount,
+                            Global.camera.y + HEROFRONT_Y), 2.0f))
                             isMoved = true;
                         heroFrontCount++;
                     }
                     else
                     {
-                        if (fighterObject.MoveLocation(new Point(Global.camera.x + heroBehindStartX + HERO_GAP_X * heroBehindCount,
-                            Global.camera.y + HEROBEHIND_Y)))
+                        if (fighterObject.MoveLocationSmooth(new Point(Global.camera.x + heroBehindStartX + HERO_GAP_X * heroBehindCount,
+                            Global.camera.y + HEROBEHIND_Y), 2.0f))
                             isMoved = true;
                         heroBehindCount++;
                     }
@@ -532,6 +557,7 @@ namespace ChessRPGMac
             targetBuffer = new List<FighterObject>();
             readiedFighterObjects = new Queue<FighterObject>();
             readiedBuff = new Queue<BuffAction>();
+            deadEnemyObjects = new List<EnemyObject>();
 
             player.Look(Direction.Up);
             player.Stand();
@@ -576,6 +602,18 @@ namespace ChessRPGMac
 
 
             base.Prepare();
+        }
+
+        protected override void Finish()
+        {
+            foreach (FighterObject fighterObject in stage)
+            {
+                fighterObject.Finish();
+            }
+            selectedEffect?.Finish();
+            actionSelect?.Finish();
+            actionMenu?.Finish();
+            base.Finish();
         }
     }
 }

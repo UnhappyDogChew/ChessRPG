@@ -84,7 +84,6 @@ namespace ChessRPGMac
                         }
                         result[pickIndex] = hero;
                         pickIndex++;
-                        break;
                     }
                 }
             }
